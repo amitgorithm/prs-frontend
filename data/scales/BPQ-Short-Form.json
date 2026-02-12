@@ -1,0 +1,364 @@
+{
+    "id": "BPQ-Short-Form",
+    "name": "Body Perception Questionnaire - Short Form",
+    "shortName": "BPQ-SF",
+    "version": "1.0",
+    "description": "A shortened version of the Body Perception Questionnaire that assesses body awareness and autonomic reactivity. Measures interoceptive awareness (awareness of internal bodily sensations) and autonomic nervous system reactivity patterns.",
+    "category": "body-awareness",
+    "recallPeriod": "In general / typical experience",
+    "instructions": "Please rate how aware you are of each of the following bodily sensations. There are no right or wrong answers. Use the scale below to indicate how accurately each statement describes you in general.",
+    "estimatedTime": "5-10 minutes",
+    "scoringType": "sum-subscales",
+    "maxScore": 90,
+    "minScore": 0,
+    "totalItems": 18,
+    "administrationType": "self-report",
+
+    "questions": [
+        {
+            "id": "BPQSF_1",
+            "number": 1,
+            "question": "Swallowing frequently",
+            "type": "likert",
+            "required": true,
+            "subscale": "body-awareness",
+            "options": [
+                { "value": 1, "label": "Never", "points": 1 },
+                { "value": 2, "label": "Occasionally", "points": 2 },
+                { "value": 3, "label": "Sometimes", "points": 3 },
+                { "value": 4, "label": "Usually", "points": 4 },
+                { "value": 5, "label": "Always", "points": 5 }
+            ]
+        },
+        {
+            "id": "BPQSF_2",
+            "number": 2,
+            "question": "An urge to cough to clear my throat",
+            "type": "likert",
+            "required": true,
+            "subscale": "body-awareness",
+            "options": [
+                { "value": 1, "label": "Never", "points": 1 },
+                { "value": 2, "label": "Occasionally", "points": 2 },
+                { "value": 3, "label": "Sometimes", "points": 3 },
+                { "value": 4, "label": "Usually", "points": 4 },
+                { "value": 5, "label": "Always", "points": 5 }
+            ]
+        },
+        {
+            "id": "BPQSF_3",
+            "number": 3,
+            "question": "My mouth being dry",
+            "type": "likert",
+            "required": true,
+            "subscale": "body-awareness",
+            "options": [
+                { "value": 1, "label": "Never", "points": 1 },
+                { "value": 2, "label": "Occasionally", "points": 2 },
+                { "value": 3, "label": "Sometimes", "points": 3 },
+                { "value": 4, "label": "Usually", "points": 4 },
+                { "value": 5, "label": "Always", "points": 5 }
+            ]
+        },
+        {
+            "id": "BPQSF_4",
+            "number": 4,
+            "question": "How fast I am breathing",
+            "type": "likert",
+            "required": true,
+            "subscale": "body-awareness",
+            "options": [
+                { "value": 1, "label": "Never", "points": 1 },
+                { "value": 2, "label": "Occasionally", "points": 2 },
+                { "value": 3, "label": "Sometimes", "points": 3 },
+                { "value": 4, "label": "Usually", "points": 4 },
+                { "value": 5, "label": "Always", "points": 5 }
+            ]
+        },
+        {
+            "id": "BPQSF_5",
+            "number": 5,
+            "question": "Watering or tearing of my eyes",
+            "type": "likert",
+            "required": true,
+            "subscale": "body-awareness",
+            "options": [
+                { "value": 1, "label": "Never", "points": 1 },
+                { "value": 2, "label": "Occasionally", "points": 2 },
+                { "value": 3, "label": "Sometimes", "points": 3 },
+                { "value": 4, "label": "Usually", "points": 4 },
+                { "value": 5, "label": "Always", "points": 5 }
+            ]
+        },
+        {
+            "id": "BPQSF_6",
+            "number": 6,
+            "question": "Noises associated with my digestion",
+            "type": "likert",
+            "required": true,
+            "subscale": "body-awareness",
+            "options": [
+                { "value": 1, "label": "Never", "points": 1 },
+                { "value": 2, "label": "Occasionally", "points": 2 },
+                { "value": 3, "label": "Sometimes", "points": 3 },
+                { "value": 4, "label": "Usually", "points": 4 },
+                { "value": 5, "label": "Always", "points": 5 }
+            ]
+        },
+        {
+            "id": "BPQSF_7",
+            "number": 7,
+            "question": "An urge to urinate",
+            "type": "likert",
+            "required": true,
+            "subscale": "body-awareness",
+            "options": [
+                { "value": 1, "label": "Never", "points": 1 },
+                { "value": 2, "label": "Occasionally", "points": 2 },
+                { "value": 3, "label": "Sometimes", "points": 3 },
+                { "value": 4, "label": "Usually", "points": 4 },
+                { "value": 5, "label": "Always", "points": 5 }
+            ]
+        },
+        {
+            "id": "BPQSF_8",
+            "number": 8,
+            "question": "Goosebumps",
+            "type": "likert",
+            "required": true,
+            "subscale": "body-awareness",
+            "options": [
+                { "value": 1, "label": "Never", "points": 1 },
+                { "value": 2, "label": "Occasionally", "points": 2 },
+                { "value": 3, "label": "Sometimes", "points": 3 },
+                { "value": 4, "label": "Usually", "points": 4 },
+                { "value": 5, "label": "Always", "points": 5 }
+            ]
+        },
+        {
+            "id": "BPQSF_9",
+            "number": 9,
+            "question": "Stomach and gut pains",
+            "type": "likert",
+            "required": true,
+            "subscale": "body-awareness",
+            "options": [
+                { "value": 1, "label": "Never", "points": 1 },
+                { "value": 2, "label": "Occasionally", "points": 2 },
+                { "value": 3, "label": "Sometimes", "points": 3 },
+                { "value": 4, "label": "Usually", "points": 4 },
+                { "value": 5, "label": "Always", "points": 5 }
+            ]
+        },
+        {
+            "id": "BPQSF_10",
+            "number": 10,
+            "question": "Stomach distension or bloatedness",
+            "type": "likert",
+            "required": true,
+            "subscale": "body-awareness",
+            "options": [
+                { "value": 1, "label": "Never", "points": 1 },
+                { "value": 2, "label": "Occasionally", "points": 2 },
+                { "value": 3, "label": "Sometimes", "points": 3 },
+                { "value": 4, "label": "Usually", "points": 4 },
+                { "value": 5, "label": "Always", "points": 5 }
+            ]
+        },
+        {
+            "id": "BPQSF_11",
+            "number": 11,
+            "question": "Muscle tension in my arms and legs",
+            "type": "likert",
+            "required": true,
+            "subscale": "body-awareness",
+            "options": [
+                { "value": 1, "label": "Never", "points": 1 },
+                { "value": 2, "label": "Occasionally", "points": 2 },
+                { "value": 3, "label": "Sometimes", "points": 3 },
+                { "value": 4, "label": "Usually", "points": 4 },
+                { "value": 5, "label": "Always", "points": 5 }
+            ]
+        },
+        {
+            "id": "BPQSF_12",
+            "number": 12,
+            "question": "A tremor in my lips",
+            "type": "likert",
+            "required": true,
+            "subscale": "body-awareness",
+            "options": [
+                { "value": 1, "label": "Never", "points": 1 },
+                { "value": 2, "label": "Occasionally", "points": 2 },
+                { "value": 3, "label": "Sometimes", "points": 3 },
+                { "value": 4, "label": "Usually", "points": 4 },
+                { "value": 5, "label": "Always", "points": 5 }
+            ]
+        },
+        {
+            "id": "BPQSF_13",
+            "number": 13,
+            "question": "How hard my heart is beating",
+            "type": "likert",
+            "required": true,
+            "subscale": "autonomic-reactivity",
+            "options": [
+                { "value": 1, "label": "Never", "points": 1 },
+                { "value": 2, "label": "Occasionally", "points": 2 },
+                { "value": 3, "label": "Sometimes", "points": 3 },
+                { "value": 4, "label": "Usually", "points": 4 },
+                { "value": 5, "label": "Always", "points": 5 }
+            ]
+        },
+        {
+            "id": "BPQSF_14",
+            "number": 14,
+            "question": "An urge to defecate",
+            "type": "likert",
+            "required": true,
+            "subscale": "body-awareness",
+            "options": [
+                { "value": 1, "label": "Never", "points": 1 },
+                { "value": 2, "label": "Occasionally", "points": 2 },
+                { "value": 3, "label": "Sometimes", "points": 3 },
+                { "value": 4, "label": "Usually", "points": 4 },
+                { "value": 5, "label": "Always", "points": 5 }
+            ]
+        },
+        {
+            "id": "BPQSF_15",
+            "number": 15,
+            "question": "How fast my heart is beating",
+            "type": "likert",
+            "required": true,
+            "subscale": "autonomic-reactivity",
+            "options": [
+                { "value": 1, "label": "Never", "points": 1 },
+                { "value": 2, "label": "Occasionally", "points": 2 },
+                { "value": 3, "label": "Sometimes", "points": 3 },
+                { "value": 4, "label": "Usually", "points": 4 },
+                { "value": 5, "label": "Always", "points": 5 }
+            ]
+        },
+        {
+            "id": "BPQSF_16",
+            "number": 16,
+            "question": "Feeling nauseous",
+            "type": "likert",
+            "required": true,
+            "subscale": "body-awareness",
+            "options": [
+                { "value": 1, "label": "Never", "points": 1 },
+                { "value": 2, "label": "Occasionally", "points": 2 },
+                { "value": 3, "label": "Sometimes", "points": 3 },
+                { "value": 4, "label": "Usually", "points": 4 },
+                { "value": 5, "label": "Always", "points": 5 }
+            ]
+        },
+        {
+            "id": "BPQSF_17",
+            "number": 17,
+            "question": "A bitter taste in my mouth",
+            "type": "likert",
+            "required": true,
+            "subscale": "body-awareness",
+            "options": [
+                { "value": 1, "label": "Never", "points": 1 },
+                { "value": 2, "label": "Occasionally", "points": 2 },
+                { "value": 3, "label": "Sometimes", "points": 3 },
+                { "value": 4, "label": "Usually", "points": 4 },
+                { "value": 5, "label": "Always", "points": 5 }
+            ]
+        },
+        {
+            "id": "BPQSF_18",
+            "number": 18,
+            "question": "Muscles in my face twitching or trembling",
+            "type": "likert",
+            "required": true,
+            "subscale": "body-awareness",
+            "options": [
+                { "value": 1, "label": "Never", "points": 1 },
+                { "value": 2, "label": "Occasionally", "points": 2 },
+                { "value": 3, "label": "Sometimes", "points": 3 },
+                { "value": 4, "label": "Usually", "points": 4 },
+                { "value": 5, "label": "Always", "points": 5 }
+            ]
+        }
+    ],
+
+    "subscales": [
+        {
+            "id": "body-awareness",
+            "name": "Body Awareness",
+            "items": ["BPQSF_1", "BPQSF_2", "BPQSF_3", "BPQSF_4", "BPQSF_5", "BPQSF_6", "BPQSF_7", "BPQSF_8", "BPQSF_9", "BPQSF_10", "BPQSF_11", "BPQSF_12", "BPQSF_14", "BPQSF_16", "BPQSF_17", "BPQSF_18"],
+            "minScore": 16,
+            "maxScore": 80,
+            "description": "Awareness of various internal bodily sensations"
+        },
+        {
+            "id": "autonomic-reactivity",
+            "name": "Autonomic Reactivity",
+            "items": ["BPQSF_13", "BPQSF_15"],
+            "minScore": 2,
+            "maxScore": 10,
+            "description": "Awareness of cardiovascular/autonomic sensations"
+        }
+    ],
+
+    "severityBands": [
+        {
+            "id": "low",
+            "label": "Low Body Awareness",
+            "range": { "min": 18, "max": 35 },
+            "color": "#3b82f6",
+            "description": "Lower than average interoceptive awareness."
+        },
+        {
+            "id": "moderate",
+            "label": "Moderate Body Awareness",
+            "range": { "min": 36, "max": 53 },
+            "color": "#22c55e",
+            "description": "Typical range of interoceptive awareness."
+        },
+        {
+            "id": "high",
+            "label": "High Body Awareness",
+            "range": { "min": 54, "max": 71 },
+            "color": "#eab308",
+            "description": "Higher than average interoceptive awareness."
+        },
+        {
+            "id": "very-high",
+            "label": "Very High Body Awareness",
+            "range": { "min": 72, "max": 90 },
+            "color": "#f97316",
+            "description": "Very high interoceptive awareness, may indicate hypervigilance to bodily sensations."
+        }
+    ],
+
+    "interpretation": {
+        "scoringMethod": "Sum all item scores (range 18-90). Subscale scores can be calculated separately. Higher scores indicate greater body/interoceptive awareness.",
+        "clinicalContext": "The BPQ-SF measures interoception - the sense of the internal state of the body. Altered interoception is associated with anxiety, depression, autism spectrum conditions, and various somatic disorders.",
+        "bidirectionalInterpretation": "Both very low and very high scores may be clinically relevant. Low scores may indicate disconnection from bodily signals; high scores may indicate hypervigilance or somatic focus.",
+        "populationNorms": "Healthy adults typically score in the moderate range (36-53)."
+    },
+
+    "references": [
+        {
+            "citation": "Porges SW. Body Perception Questionnaire. Laboratory of Developmental Assessment, University of Maryland. 1993.",
+            "note": "Original full BPQ"
+        },
+        {
+            "citation": "Cabrera A, Kolacz J, Pailhez G, Bulbena-Cabre A, Bulbena A, Porges SW. Assessing body awareness and autonomic reactivity: Factor structure and psychometric properties of the Body Perception Questionnaire-Short Form (BPQ-SF). Int J Methods Psychiatr Res. 2018;27(2):e1596.",
+            "doi": "10.1002/mpr.1596"
+        }
+    ],
+
+    "metadata": {
+        "createdAt": "2026-02-11",
+        "updatedAt": "2026-02-11",
+        "author": "Porges SW (original); Cabrera A et al. (short form)",
+        "license": "Free for clinical and research use with attribution"
+    }
+}

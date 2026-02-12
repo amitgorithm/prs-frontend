@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PRS Clinical Assessment — Sozo Brain Center</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="assets/favicon.ico">
+    <link rel="apple-touch-icon" href="assets/logo.png">
+    
+    <!-- Fonts & Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- jsPDF for PDF Generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    
+    <!-- Application Styles -->
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <!-- ========================================
+         HEADER
+    ========================================= -->
+    <header class="app-header">
+        <div class="header-content">
+            <div class="logo-section">
+                <img src="assets/logo.png" 
+                     alt="Sozo Brain Center" 
+                     class="sozo-logo">
+                <div class="logo-divider"></div>
+                <div class="app-title">
+                    <span class="title-main">Patient Rating System</span>
+                    <span class="title-sub">Clinical Assessment Tool</span>
+                </div>
+            </div>
+            <div class="header-actions">
+                <button class="btn-icon" id="btnNewSession" title="New Session">
+                    <i class="fas fa-plus"></i>
+                </button>
+                <button class="btn-icon" id="btnSettings" title="Settings">
+                    <i class="fas fa-cog"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- ========================================
+         MAIN APPLICATION CONTAINER
+    ========================================= -->
+    <main class="app-main">
+        <!-- Screen 0: Patient Entry -->
+        <section id="screenPatient" class="screen active">
+            <div class="screen-container">
+                <div class="welcome-card">
+                    <div class="welcome-icon">
+                        <i class="fas fa-user-plus"></i>
+                    </div>
+                    <h1>New Patient Assessment</h1>
+                    <p class="welcome-subtitle">Enter patient details to begin the clinical assessment</p>
+                    
+                    <div class="form-group">
+                        <label for="patientName" class="form-label">Patient Name</label>
+                        <input type="text" id="patientName" class="form-input" placeholder="Enter patient's full name..." autocomplete="off">
+                    </div>
+                    
+                    <div class="patient-id-preview hidden" id="patientIdPreview">
+                        <div class="id-label">Generated Patient ID</div>
+                        <div class="id-value" id="generatedPatientId">PAT_XXXXXXXXXX</div>
+                    </div>
+                    
+                    <button id="btnProceedToCondition" class="btn btn-primary btn-lg" disabled>
+                        <i class="fas fa-arrow-right"></i>
+                        Continue to Condition Selection
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Screen 1: Condition Selection -->
+        <section id="screenCondition" class="screen">
+            <div class="condition-screen-container">
+                <div class="condition-header">
+                    <div class="patient-info-bar">
+                        <div class="patient-badge">
+                            <i class="fas fa-user"></i>
+                            <span id="displayPatientName">Patient Name</span>
+                        </div>
+                        <div class="patient-id-badge">
+                            <i class="fas fa-id-card"></i>
+                            <span id="displayPatientId">PAT_XXXXXXXXXX</span>
+                        </div>
+                    </div>
+                    <h1>Select Condition</h1>
+                    <p class="condition-subtitle">Choose the primary condition for this assessment</p>
+                </div>
+                
+                <div class="condition-grid" id="conditionGrid">
+                    <!-- Condition cards populated dynamically -->
+                </div>
+                
+                <!-- Selected Condition Info Panel -->
+                <div id="selectedConditionPanel" class="selected-condition-panel hidden">
+                    <div class="panel-header">
+                        <div class="panel-title">
+                            <i class="fas fa-check-circle"></i>
+                            <span id="selectedConditionName">Selected Condition</span>
+                        </div>
+                        <button class="btn-change" id="btnChangeCondition">
+                            <i class="fas fa-redo"></i> Change
+                        </button>
+                    </div>
+                    <div class="panel-content">
+                        <p class="panel-description" id="selectedConditionDesc">Description</p>
+                        <div class="scales-preview">
+                            <div class="scales-count">
+                                <strong><span id="scaleCount">0</span> Scales</strong> will be administered:
+                            </div>
+                            <ul id="scaleList" class="scale-list"></ul>
+                        </div>
+                    </div>
+                    <button id="btnStartAssessment" class="btn btn-primary btn-lg">
+                        <i class="fas fa-play"></i>
+                        Begin Assessment
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Screen 2: Scale Assessment -->
+        <section id="screenAssessment" class="screen">
+            <div class="assessment-layout">
+                <!-- Left Sidebar: Scale Navigation -->
+                <aside class="scale-sidebar">
+                    <div class="sidebar-header">
+                        <h3>Assessment Progress</h3>
+                        <div class="overall-progress-mini">
+                            <div class="progress-ring">
+                                <span id="progressPercent">0%</span>
+                            </div>
+                        </div>
+                    </div>
+                    <nav class="scale-nav" id="scaleNavList">
+                        <!-- Scale navigation items rendered dynamically -->
+                    </nav>
+                </aside>
+
+                <!-- Main Content: Current Scale -->
+                <main class="scale-main">
+                    <!-- Scale Header -->
+                    <header class="scale-info-header">
+                        <div class="scale-badge">
+                            <span class="scale-number" id="currentScaleNumber">1</span>
+                            <span class="scale-total" id="totalScales">of 5</span>
+                        </div>
+                        <div class="scale-title-section">
+                            <h1 id="scaleTitle">Patient Health Questionnaire (PHQ-9)</h1>
+                            <p class="scale-description" id="scaleDescription">A self-administered depression screening measure</p>
+                        </div>
+                    </header>
+
+                    <!-- Scale Meta Info Bar -->
+                    <div class="scale-meta-bar">
+                        <div class="meta-item">
+                            <i class="fas fa-calendar-alt"></i>
+                            <span id="recallPeriod">Over the last 2 weeks</span>
+                        </div>
+                        <div class="meta-item">
+                            <i class="fas fa-calculator"></i>
+                            <span id="scoringInfo">Sum of all items (0-27)</span>
+                        </div>
+                        <div class="meta-item">
+                            <i class="fas fa-clock"></i>
+                            <span id="estimatedTime">~3 minutes</span>
+                        </div>
+                        <div class="meta-item answered-count">
+                            <i class="fas fa-check-circle"></i>
+                            <span><strong id="answeredCount">0</strong> of <span id="totalQuestions">9</span> answered</span>
+                        </div>
+                    </div>
+
+                    <!-- Instructions Box -->
+                    <div class="scale-instructions" id="scaleInstructions">
+                        <i class="fas fa-info-circle"></i>
+                        <p>Please read each statement carefully and select the response that best describes how often you have been bothered by each problem.</p>
+                    </div>
+
+                    <!-- All Questions Container -->
+                    <div class="questions-scroll-container" id="questionsContainer">
+                        <!-- All questions for current scale rendered here -->
+                    </div>
+
+                    <!-- Navigation Footer -->
+                    <footer class="scale-nav-footer">
+                        <button class="btn btn-secondary btn-lg" id="btnPrevQuestion">
+                            <i class="fas fa-arrow-left"></i>
+                            Previous Scale
+                        </button>
+                        <div class="completion-status" id="completionStatus">
+                            <span class="status-incomplete"><i class="fas fa-exclamation-circle"></i> Please answer all questions</span>
+                        </div>
+                        <button class="btn btn-warning btn-sm" id="btnDevPrefill" style="background: #f39c12; color: white; padding: 8px 16px; font-size: 12px;">
+                            <i class="fas fa-magic"></i> Auto-Fill (Dev)
+                        </button>
+                        <button class="btn btn-primary btn-lg" id="btnNextQuestion">
+                            Next Scale
+                            <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </footer>
+                </main>
+            </div>
+
+            <!-- Validation Message (floating) -->
+            <div class="validation-toast hidden" id="validationMessage">
+                <i class="fas fa-exclamation-triangle"></i>
+                <span>Please answer all required questions before continuing</span>
+            </div>
+        </section>
+
+        <!-- Screen 3: Results -->
+        <section id="screenResults" class="screen">
+            <div class="results-container">
+                <div class="results-header">
+                    <div class="results-icon">
+                        <i class="fas fa-chart-bar"></i>
+                    </div>
+                    <h1>Assessment Complete</h1>
+                    <p class="results-subtitle">Clinical Summary Report</p>
+                </div>
+
+                <!-- Patient Info Card -->
+                <div class="result-card patient-card">
+                    <div class="card-header">
+                        <i class="fas fa-user"></i>
+                        <span>Patient Information</span>
+                    </div>
+                    <div class="card-content">
+                        <div class="info-row">
+                            <span class="info-label">Patient ID:</span>
+                            <span class="info-value" id="resultPatientId">-</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Assessment Date:</span>
+                            <span class="info-value" id="resultDate">-</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Condition:</span>
+                            <span class="info-value" id="resultCondition">-</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Risk Flags Card (if applicable) -->
+                <div class="result-card risk-card hidden" id="riskFlagsCard">
+                    <div class="card-header risk-header">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <span>Clinical Risk Flags</span>
+                    </div>
+                    <div class="card-content" id="riskFlagsContent">
+                        <!-- Risk flags rendered dynamically -->
+                    </div>
+                </div>
+
+                <!-- Scale Results -->
+                <div class="scale-results" id="scaleResults">
+                    <!-- Scale result cards rendered dynamically -->
+                </div>
+
+                <!-- Composite Summary -->
+                <div class="result-card summary-card">
+                    <div class="card-header">
+                        <i class="fas fa-file-medical-alt"></i>
+                        <span>Clinical Summary</span>
+                    </div>
+                    <div class="card-content" id="compositeSummary">
+                        <!-- Summary rendered dynamically -->
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="results-actions">
+                    <button class="btn btn-primary btn-lg" id="btnDownloadPDF">
+                        <i class="fas fa-file-pdf"></i>
+                        Download PDF Report
+                    </button>
+                    <button class="btn btn-success btn-lg" id="btnDownloadCSV">
+                        <i class="fas fa-file-csv"></i>
+                        Download Data (CSV)
+                    </button>
+                    <button class="btn btn-secondary" id="btnNewAssessment">
+                        <i class="fas fa-plus"></i>
+                        Start New Assessment
+                    </button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- ========================================
+         FOOTER
+    ========================================= -->
+    <footer class="app-footer">
+        <div class="footer-content">
+            <span>&copy; 2024 Sozo Brain Center. All rights reserved.</span>
+            <span class="footer-divider">|</span>
+            <span>PRS Clinical Assessment System v1.0</span>
+        </div>
+    </footer>
+
+    <!-- ========================================
+         MODAL: Settings
+    ========================================= -->
+    <div class="modal-overlay hidden" id="modalSettings">
+        <div class="modal">
+            <div class="modal-header">
+                <h3><i class="fas fa-cog"></i> Settings</h3>
+                <button class="btn-close" id="btnCloseSettings">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">Auto-save Responses</label>
+                    <label class="toggle">
+                        <input type="checkbox" id="settingAutoSave" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Show Question Numbers</label>
+                    <label class="toggle">
+                        <input type="checkbox" id="settingShowNumbers" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================
+         JAVASCRIPT MODULES
+    ========================================= -->
+    <script type="module" src="js/app.js"></script>
+</body>
+</html>
