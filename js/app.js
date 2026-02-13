@@ -74,19 +74,35 @@ const elements = {
     riskFlagsContent: document.getElementById('riskFlagsContent'),
     scaleResults: document.getElementById('scaleResults'),
     compositeSummary: document.getElementById('compositeSummary'),
+    btnViewReport: document.getElementById('btnViewReport'),
     btnDownloadPDF: document.getElementById('btnDownloadPDF'),
     btnDownloadCSV: document.getElementById('btnDownloadCSV'),
     btnNewAssessment: document.getElementById('btnNewAssessment'),
+    btnEditResponses: document.getElementById('btnEditResponses'),
     
-    // Header
-    btnNewSession: document.getElementById('btnNewSession'),
-    btnSettings: document.getElementById('btnSettings'),
+    // Header Menu
+    btnHeaderMenu: document.getElementById('btnHeaderMenu'),
+    headerDropdown: document.getElementById('headerDropdown'),
+    btnMenuNewAssessment: document.getElementById('btnMenuNewAssessment'),
+    btnMenuSettings: document.getElementById('btnMenuSettings'),
+    
+    // Assessment Actions
+    btnSkipScale: document.getElementById('btnSkipScale'),
     
     // Settings Modal
     modalSettings: document.getElementById('modalSettings'),
     btnCloseSettings: document.getElementById('btnCloseSettings'),
     settingAutoSave: document.getElementById('settingAutoSave'),
-    settingShowNumbers: document.getElementById('settingShowNumbers')
+    settingShowNumbers: document.getElementById('settingShowNumbers'),
+    
+    // Completion Modal
+    modalCompletion: document.getElementById('modalCompletion'),
+    completionSummary: document.getElementById('completionSummary'),
+    btnCompletionBack: document.getElementById('btnCompletionBack'),
+    btnCompletionConfirm: document.getElementById('btnCompletionConfirm'),
+    
+    // Loading Overlay
+    loadingOverlay: document.getElementById('loadingOverlay')
 };
 
 // ========================================
@@ -102,16 +118,84 @@ async function init() {
     // Load condition map
     await loadConditionMap();
     
-    // Initialize state
-    StateManager.initSession();
-    
-    // Setup event listeners
+    // Setup event listeners FIRST (before showing any screen)
     setupEventListeners();
     
-    // Show patient entry screen
-    showScreen('patient');
+    // Try to restore existing session from localStorage
+    const hasExistingSession = StateManager.loadFromLocalStorage();
+    
+    if (hasExistingSession) {
+        const state = StateManager.getState();
+        console.log('Restored existing session:', state.patient_id);
+        
+        // Restore to appropriate screen based on state
+        await restoreSession(state);
+    } else {
+        // No existing session - start fresh
+        StateManager.initSession();
+        showScreen('patient');
+    }
     
     console.log('PRS Application Ready');
+}
+
+/**
+ * Restore session to appropriate screen
+ */
+async function restoreSession(state) {
+    // If we have scores, go to results screen
+    if (Object.keys(state.scores || {}).length > 0 && 
+        Object.keys(state.scores).length >= (state.scaleOrder?.length || 0)) {
+        // All scales completed - show results
+        await loadAllScalesForResults();
+        showResults();
+    } 
+    // If we have a condition selected and started assessment
+    else if (state.condition && state.scaleOrder?.length > 0) {
+        // Resume assessment
+        await loadCurrentScaleAndResume();
+    }
+    // If we have patient info but no condition
+    else if (state.patient_name) {
+        // Show condition selection
+        elements.displayPatientName.textContent = state.patient_name;
+        elements.displayPatientId.textContent = state.patient_id;
+        showScreen('condition');
+    }
+    // Otherwise start fresh
+    else {
+        showScreen('patient');
+    }
+}
+
+/**
+ * Load all scales for results display
+ */
+async function loadAllScalesForResults() {
+    const state = StateManager.getState();
+    for (const scaleId of state.scaleOrder || []) {
+        if (!scales[scaleId]) {
+            try {
+                scales[scaleId] = await loadScale(scaleId);
+            } catch (e) {
+                console.warn(`Failed to load scale ${scaleId}:`, e);
+            }
+        }
+    }
+}
+
+/**
+ * Load current scale and resume assessment
+ */
+async function loadCurrentScaleAndResume() {
+    try {
+        await loadCurrentScale();
+        showScreen('assessment');
+    } catch (e) {
+        console.error('Failed to resume scale:', e);
+        StateManager.initSession();
+        showScreen('patient');
+    }
 }
 
 /**
@@ -237,18 +321,57 @@ function setupEventListeners() {
     }
     
     // Results
+    elements.btnViewReport.addEventListener('click', () => window.location.href = 'report-view.html');
     elements.btnDownloadPDF.addEventListener('click', handleDownloadPDF);
     elements.btnDownloadCSV.addEventListener('click', handleDownloadCSV);
     elements.btnNewAssessment.addEventListener('click', handleNewAssessment);
+    elements.btnEditResponses.addEventListener('click', handleEditResponses);
     
-    // Header actions
-    elements.btnNewSession.addEventListener('click', handleNewAssessment);
-    elements.btnSettings.addEventListener('click', () => showModal('settings'));
+    // Skip scale button
+    if (elements.btnSkipScale) {
+        elements.btnSkipScale.addEventListener('click', handleSkipScale);
+    }
+    
+    // Header menu
+    if (elements.btnHeaderMenu) {
+        elements.btnHeaderMenu.addEventListener('click', toggleHeaderMenu);
+    }
+    if (elements.btnMenuNewAssessment) {
+        elements.btnMenuNewAssessment.addEventListener('click', () => {
+            hideHeaderMenu();
+            handleNewAssessment();
+        });
+    }
+    if (elements.btnMenuSettings) {
+        elements.btnMenuSettings.addEventListener('click', () => {
+            hideHeaderMenu();
+            showModal('settings');
+        });
+    }
+    
+    // Close header menu when clicking outside
+    document.addEventListener('click', (e) => {
+        if (elements.headerDropdown && !elements.headerDropdown.classList.contains('hidden')) {
+            if (!elements.btnHeaderMenu.contains(e.target) && !elements.headerDropdown.contains(e.target)) {
+                hideHeaderMenu();
+            }
+        }
+    });
     
     // Settings modal
     elements.btnCloseSettings.addEventListener('click', () => hideModal('settings'));
     elements.settingAutoSave.addEventListener('change', handleSettingsChange);
     elements.settingShowNumbers.addEventListener('change', handleSettingsChange);
+    
+    // Completion modal
+    if (elements.btnCompletionBack) {
+        elements.btnCompletionBack.addEventListener('click', () => {
+            hideModal('completion');
+        });
+    }
+    if (elements.btnCompletionConfirm) {
+        elements.btnCompletionConfirm.addEventListener('click', handleConfirmCompletion);
+    }
     
     // Close modal on overlay click
     elements.modalSettings.addEventListener('click', (e) => {
@@ -256,6 +379,13 @@ function setupEventListeners() {
             hideModal('settings');
         }
     });
+    if (elements.modalCompletion) {
+        elements.modalCompletion.addEventListener('click', (e) => {
+            if (e.target === elements.modalCompletion) {
+                hideModal('completion');
+            }
+        });
+    }
     
     // Keyboard navigation
     document.addEventListener('keydown', handleKeyboardNavigation);
@@ -472,27 +602,40 @@ function getScoringDescription(scale) {
  */
 function renderScaleNavigation() {
     const state = StateManager.getState();
+    const skippedScales = StateManager.getSkippedScales();
+    const highestReached = state.highestScaleIndex || 0;
     
     let html = '';
     state.scaleOrder.forEach((scaleId, index) => {
         const scaleMeta = conditionMap.scaleMetadata?.[scaleId] || { name: scaleId };
         const isActive = index === state.currentScaleIndex;
-        const isCompleted = index < state.currentScaleIndex;
         const responses = StateManager.getScaleResponses(scaleId);
         const answeredCount = Object.keys(responses || {}).length;
+        const hasResponses = answeredCount > 0;
+        
+        // A scale is only "skipped" if it's in the skipped list AND has no responses
+        const isSkipped = skippedScales.includes(scaleId) && !hasResponses;
+        const isCompleted = hasResponses || index < highestReached;
+        
+        // Clickable if: acted upon (index < highestReached) AND not current scale
+        const isClickable = index < highestReached && index !== state.currentScaleIndex;
         
         let status = 'pending';
-        if (isCompleted) status = 'completed';
+        if (isSkipped) status = 'skipped';
         else if (isActive) status = 'active';
+        else if (isCompleted && !isActive) status = 'completed';
+        
+        const icon = isSkipped ? '<i class="fas fa-forward"></i>' : 
+                     (status === 'completed' ? '<i class="fas fa-check"></i>' : (index + 1));
         
         html += `
-            <div class="scale-nav-item ${status}" data-scale-index="${index}">
+            <div class="scale-nav-item ${status}${isClickable ? ' clickable' : ''}" data-scale-index="${index}" data-scale-id="${scaleId}">
                 <div class="nav-item-indicator">
-                    ${isCompleted ? '<i class="fas fa-check"></i>' : (index + 1)}
+                    ${icon}
                 </div>
                 <div class="nav-item-content">
                     <span class="nav-item-name">${scaleId}</span>
-                    <span class="nav-item-full">${scaleMeta.name}</span>
+                    <span class="nav-item-full">${scaleMeta.name}${isSkipped ? ' (Skipped)' : ''}</span>
                 </div>
             </div>
         `;
@@ -500,9 +643,46 @@ function renderScaleNavigation() {
     
     elements.scaleNavList.innerHTML = html;
     
+    // Add click handlers only to clickable nav items
+    elements.scaleNavList.querySelectorAll('.scale-nav-item.clickable').forEach(item => {
+        item.addEventListener('click', () => {
+            const targetIndex = parseInt(item.dataset.scaleIndex);
+            navigateToScale(targetIndex);
+        });
+    });
+    
     // Update progress percentage
-    const progress = Math.round((state.currentScaleIndex / state.scaleOrder.length) * 100);
+    const completedCount = state.scaleOrder.filter((scaleId) => {
+        const responses = StateManager.getScaleResponses(scaleId);
+        const hasResponses = Object.keys(responses || {}).length > 0;
+        const isSkipped = skippedScales.includes(scaleId) && !hasResponses;
+        return hasResponses || isSkipped;
+    }).length;
+    const progress = Math.round((completedCount / state.scaleOrder.length) * 100);
     elements.progressPercent.textContent = `${progress}%`;
+}
+
+/**
+ * Navigate to a specific scale by index (only acted-upon scales allowed)
+ */
+async function navigateToScale(targetIndex) {
+    const state = StateManager.getState();
+    const highestReached = state.highestScaleIndex || 0;
+    
+    if (targetIndex < 0 || targetIndex >= state.scaleOrder.length) return;
+    if (targetIndex === state.currentScaleIndex) return;
+    
+    // Can only navigate to scales already acted upon
+    if (targetIndex >= highestReached) {
+        console.log('Cannot navigate to scale not yet reached');
+        return;
+    }
+    
+    // Update state to target scale
+    StateManager.updateState({ currentScaleIndex: targetIndex });
+    
+    // Load and render the scale
+    await loadCurrentScale();
 }
 
 /**
@@ -635,7 +815,7 @@ function attachAllHandlers() {
         });
     });
     
-    // Text/number/time inputs
+    // Text/number/select inputs (general question-input class)
     document.querySelectorAll('.question-input').forEach(input => {
         input.addEventListener('change', (e) => {
             const questionIndex = parseInt(input.dataset.question);
@@ -651,6 +831,35 @@ function attachAllHandlers() {
             StateManager.recordResponse(scaleId, questionIndex, value);
             updateAnsweredCount();
         });
+    });
+    
+    // Time dropdowns (hour, minute, period combined)
+    document.querySelectorAll('.time-dropdown-container').forEach(container => {
+        const hourSelect = container.querySelector('.time-hour');
+        const minuteSelect = container.querySelector('.time-minute');
+        const periodSelect = container.querySelector('.time-period');
+        
+        const updateTimeValue = () => {
+            const questionIndex = parseInt(hourSelect.dataset.question);
+            const hour = hourSelect.value;
+            const minute = minuteSelect.value;
+            const period = periodSelect.value;
+            
+            const questionCard = container.closest('.question-card');
+            
+            if (hour && minute) {
+                const timeValue = `${hour}:${minute} ${period}`;
+                questionCard.classList.add('answered');
+                StateManager.recordResponse(scaleId, questionIndex, timeValue);
+            } else {
+                questionCard.classList.remove('answered');
+            }
+            updateAnsweredCount();
+        };
+        
+        hourSelect.addEventListener('change', updateTimeValue);
+        minuteSelect.addEventListener('change', updateTimeValue);
+        periodSelect.addEventListener('change', updateTimeValue);
     });
     
     // VAS sliders
@@ -783,38 +992,100 @@ function renderCurrentQuestion() {
  * Render time input
  */
 function renderTimeInput(question, savedResponse, questionIndex) {
+    // Parse saved response to extract hour, minute, period
+    let savedHour = '', savedMinute = '', savedPeriod = 'PM';
+    if (savedResponse) {
+        const match = savedResponse.match(/(\d{1,2}):(\d{2})\s*(AM|PM)?/i);
+        if (match) {
+            savedHour = match[1];
+            savedMinute = match[2];
+            savedPeriod = match[3] ? match[3].toUpperCase() : 'PM';
+        }
+    }
+    
+    // Generate hour options (1-12)
+    let hourOptions = '<option value="">--</option>';
+    for (let h = 1; h <= 12; h++) {
+        const selected = savedHour == h ? 'selected' : '';
+        hourOptions += `<option value="${h}" ${selected}>${h}</option>`;
+    }
+    
+    // Generate minute options (00, 15, 30, 45)
+    let minuteOptions = '<option value="">--</option>';
+    [0, 15, 30, 45].forEach(m => {
+        const mStr = m.toString().padStart(2, '0');
+        const selected = savedMinute == mStr ? 'selected' : '';
+        minuteOptions += `<option value="${mStr}" ${selected}>${mStr}</option>`;
+    });
+    
     return `
-        <div class="input-container">
-            <input type="text" 
-                   class="form-input question-input time-input" 
-                   data-question="${questionIndex}"
-                   placeholder="${question.placeholder || 'e.g., 11:00 PM'}"
-                   value="${savedResponse || ''}"
-                   autocomplete="off">
-            <div class="input-hint">Enter time (e.g., 10:30 PM or 22:30)</div>
+        <div class="input-container time-dropdown-container">
+            <div class="time-dropdowns">
+                <select class="form-select time-hour" data-question="${questionIndex}" data-part="hour">
+                    ${hourOptions}
+                </select>
+                <span class="time-separator">:</span>
+                <select class="form-select time-minute" data-question="${questionIndex}" data-part="minute">
+                    ${minuteOptions}
+                </select>
+                <select class="form-select time-period" data-question="${questionIndex}" data-part="period">
+                    <option value="AM" ${savedPeriod === 'AM' ? 'selected' : ''}>AM</option>
+                    <option value="PM" ${savedPeriod === 'PM' ? 'selected' : ''}>PM</option>
+                </select>
+            </div>
+            <div class="input-hint">Select hour, minutes, and AM/PM</div>
         </div>
     `;
 }
 
 /**
- * Render number input
+ * Render number input - uses dropdown if range is reasonable
  */
 function renderNumberInput(question, savedResponse, questionIndex) {
+    const min = question.min !== undefined ? question.min : 0;
+    const max = question.max !== undefined ? question.max : 999;
+    const step = question.step || 1;
+    
+    // For minutes (0-999) or similar, use grouped dropdown
+    // Create reasonable intervals
+    let options = '<option value="">Select...</option>';
+    
+    if (max - min <= 60) {
+        // Small range - show all values
+        for (let v = min; v <= max; v += step) {
+            const selected = savedResponse == v ? 'selected' : '';
+            options += `<option value="${v}" ${selected}>${v}${question.unit ? ' ' + question.unit : ''}</option>`;
+        }
+    } else {
+        // Large range - create intervals
+        const intervals = [0, 5, 10, 15, 20, 30, 45, 60, 90, 120, 180, 240, 300, 360, 480, 600, 720];
+        // Filter to valid range
+        const validIntervals = intervals.filter(v => v >= min && v <= max);
+        
+        // Add custom groupings for minutes-style input
+        validIntervals.forEach(v => {
+            const selected = savedResponse == v ? 'selected' : '';
+            let label = v.toString();
+            if (question.unit === 'minutes' && v >= 60) {
+                const hrs = Math.floor(v / 60);
+                const mins = v % 60;
+                label = `${v} (${hrs}h${mins > 0 ? ' ' + mins + 'm' : ''})`;
+            }
+            options += `<option value="${v}" ${selected}>${label}</option>`;
+        });
+    }
+    
     return `
         <div class="input-container">
-            <div class="number-input-wrapper">
-                <input type="number" 
-                       class="form-input question-input number-input" 
-                       data-question="${questionIndex}"
-                       min="${question.min !== undefined ? question.min : ''}"
-                       max="${question.max !== undefined ? question.max : ''}"
-                       step="${question.step || 1}"
-                       value="${savedResponse || ''}"
-                       autocomplete="off">
+            <div class="number-dropdown-wrapper">
+                <select class="form-select question-input number-select" 
+                        data-question="${questionIndex}">
+                    ${options}
+                </select>
                 ${question.unit ? `<span class="input-unit">${question.unit}</span>` : ''}
             </div>
             ${question.min !== undefined || question.max !== undefined ? 
-                `<div class="input-hint">Range: ${question.min || 0} - ${question.max || '∞'}</div>` : ''}
+                `<div class="input-hint">Range: ${min} - ${max}${question.unit ? ' ' + question.unit : ''}</div>` : ''}
         </div>
     `;
 }
@@ -1095,8 +1366,8 @@ async function handleNextQuestion() {
     const isLastScale = state.currentScaleIndex >= state.scaleOrder.length - 1;
     
     if (isLastScale) {
-        // Assessment complete - show results
-        showResults();
+        // Assessment complete - show confirmation modal
+        showCompletionModal();
     } else {
         // Move to next scale
         console.log('Moving to next scale...');
@@ -1408,7 +1679,7 @@ async function handleDownloadPDF() {
 }
 
 /**
- * Handle CSV download
+ * Handle CSV download - generates two files: summary + responses
  */
 function handleDownloadCSV() {
     try {
@@ -1418,72 +1689,110 @@ function handleDownloadCSV() {
         const state = StateManager.getState();
         const scores = StateManager.getAllScores();
         const responses = state.responses;
+        const date = new Date(state.session_start).toISOString().split('T')[0];
+        const baseFilename = `${state.patient_id}_${(state.condition || 'assessment').replace(/\s+/g, '-')}_${date}`;
         
-        // Build CSV rows
-        const rows = [];
+        // ========================================
+        // FILE 1: SUMMARY CSV (one row per scale)
+        // ========================================
+        const summaryRows = [];
         
-        // Header row
-        const headers = [
+        // Summary header
+        summaryRows.push([
             'patient_id',
-            'patient_name',
+            'patient_name', 
             'condition',
-            'condition_label',
             'assessment_date',
+            'assessment_type',
             'scale_id',
             'scale_name',
-            'question_num',
-            'response_value',
             'total_score',
             'max_possible',
             'percentage',
             'severity_level',
-            'severity_label'
-        ];
-        rows.push(headers.join(','));
+            'severity_label',
+            'subscale_1_name',
+            'subscale_1_score',
+            'subscale_2_name',
+            'subscale_2_score',
+            'subscale_3_name',
+            'subscale_3_score'
+        ].join(','));
         
-        // Data rows - one per question/response
-        const date = new Date(state.session_start).toISOString();
+        // Summary data rows
+        Object.keys(scores).forEach(scaleId => {
+            const score = scores[scaleId];
+            
+            // Get subscales if any
+            const subscales = score.subscaleScores ? Object.values(score.subscaleScores) : [];
+            
+            const row = [
+                escapeCSV(state.patient_id || ''),
+                escapeCSV(state.patient_name || ''),
+                escapeCSV(state.conditionLabel || state.condition || ''),
+                escapeCSV(date),
+                'Pre',
+                escapeCSV(scaleId),
+                escapeCSV(score.scaleName || scaleId),
+                score.total ?? '',
+                score.maxPossible ?? '',
+                score.percentage ?? '',
+                escapeCSV(score.severity?.level || ''),
+                escapeCSV(score.severity?.label || ''),
+                escapeCSV(subscales[0]?.name || ''),
+                subscales[0]?.score ?? '',
+                escapeCSV(subscales[1]?.name || ''),
+                subscales[1]?.score ?? '',
+                escapeCSV(subscales[2]?.name || ''),
+                subscales[2]?.score ?? ''
+            ];
+            summaryRows.push(row.join(','));
+        });
         
+        downloadCSVFile(summaryRows.join('\n'), `${baseFilename}_SUMMARY.csv`);
+        
+        // ========================================
+        // FILE 2: RESPONSES CSV (one row per question)
+        // ========================================
+        const responseRows = [];
+        
+        // Response header
+        responseRows.push([
+            'patient_id',
+            'assessment_date',
+            'scale_id',
+            'scale_name',
+            'question_number',
+            'question_index',
+            'response_value'
+        ].join(','));
+        
+        // Response data rows
         Object.keys(responses).forEach(scaleId => {
             const scaleResponses = responses[scaleId];
             const score = scores[scaleId] || {};
             
-            Object.keys(scaleResponses).forEach(qNum => {
+            // Sort question numbers
+            const questionNums = Object.keys(scaleResponses).sort((a, b) => parseInt(a) - parseInt(b));
+            
+            questionNums.forEach((qIndex, displayNum) => {
                 const row = [
                     escapeCSV(state.patient_id || ''),
-                    escapeCSV(state.patient_name || ''),
-                    escapeCSV(state.condition || ''),
-                    escapeCSV(state.conditionLabel || ''),
                     escapeCSV(date),
                     escapeCSV(scaleId),
                     escapeCSV(score.scaleName || scaleId),
-                    qNum,
-                    scaleResponses[qNum],
-                    score.total ?? '',
-                    score.maxPossible ?? '',
-                    score.percentage ?? '',
-                    escapeCSV(score.severity?.level || ''),
-                    escapeCSV(score.severity?.label || '')
+                    displayNum + 1,  // Human-readable question number (1-based)
+                    qIndex,          // Internal question index (0-based)
+                    scaleResponses[qIndex]
                 ];
-                rows.push(row.join(','));
+                responseRows.push(row.join(','));
             });
         });
         
-        // Create and download CSV
-        const csvContent = rows.join('\n');
-        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-        const link = document.createElement('a');
-        const url = URL.createObjectURL(blob);
-        
-        const filename = `${state.patient_id}_${(state.condition || 'assessment').replace(/\s+/g, '-')}_${new Date().toISOString().split('T')[0]}.csv`;
-        
-        link.setAttribute('href', url);
-        link.setAttribute('download', filename);
-        link.style.visibility = 'hidden';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
+        // Small delay before second download
+        setTimeout(() => {
+            downloadCSVFile(responseRows.join('\n'), `${baseFilename}_RESPONSES.csv`);
+        }, 500);
         
     } catch (error) {
         console.error('CSV generation failed:', error);
@@ -1492,6 +1801,23 @@ function handleDownloadCSV() {
         elements.btnDownloadCSV.disabled = false;
         elements.btnDownloadCSV.innerHTML = '<i class="fas fa-file-csv"></i> Download Data (CSV)';
     }
+}
+
+/**
+ * Helper to download a CSV file
+ */
+function downloadCSVFile(content, filename) {
+    const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    
+    link.setAttribute('href', url);
+    link.setAttribute('download', filename);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
 }
 
 /**
@@ -1507,9 +1833,90 @@ function escapeCSV(value) {
 }
 
 /**
- * Handle new assessment
+ * Toggle header dropdown menu
+ */
+function toggleHeaderMenu() {
+    if (elements.headerDropdown) {
+        elements.headerDropdown.classList.toggle('hidden');
+    }
+}
+
+/**
+ * Hide header dropdown menu
+ */
+function hideHeaderMenu() {
+    if (elements.headerDropdown) {
+        elements.headerDropdown.classList.add('hidden');
+    }
+}
+
+/**
+ * Handle skip scale - mark current scale as skipped and move to next
+ */
+function handleSkipScale() {
+    const state = StateManager.getState();
+    const scaleId = state.scaleOrder[state.currentScaleIndex];
+    
+    const confirmed = confirm(
+        `Skip "${currentScale?.name || scaleId}"?\n\n` +
+        'This scale will be marked as skipped and will not appear in reports.\n\n' +
+        'You can go back and fill it in later to include it.'
+    );
+    
+    if (!confirmed) return;
+    
+    // Mark scale as skipped
+    StateManager.skipScale(scaleId);
+    
+    // Move to next scale or show completion modal
+    if (StateManager.isLastScale()) {
+        // Show completion modal
+        showCompletionModal();
+    } else {
+        StateManager.moveToNextScale();
+        loadCurrentScale();
+    }
+}
+
+/**
+ * Handle edit responses - go back to assessment from results
+ */
+function handleEditResponses() {
+    const state = StateManager.getState();
+    
+    // Go back to the first scale (or could let user choose)
+    StateManager.updateState({ currentScaleIndex: 0 });
+    
+    // Load and show assessment
+    loadCurrentScale();
+    showScreen('assessment');
+}
+
+/**
+ * Handle new assessment - with confirmation
  */
 function handleNewAssessment() {
+    // Check if there's existing data
+    const state = StateManager.getState();
+    const hasData = state.patient_name || Object.keys(state.responses || {}).length > 0;
+    
+    if (hasData) {
+        const confirmed = confirm(
+            '⚠️ Start New Assessment?\n\n' +
+            'This will clear all current data including:\n' +
+            '• Patient information\n' +
+            '• All questionnaire responses\n' +
+            '• Calculated scores\n\n' +
+            'Make sure you have downloaded the PDF/CSV reports if needed.\n\n' +
+            'Click OK to start fresh, or Cancel to go back.'
+        );
+        
+        if (!confirmed) {
+            return;
+        }
+    }
+    
+    // Clear everything
     StateManager.initSession();
     StateManager.clearSavedState();
     currentScale = null;
@@ -1632,6 +2039,8 @@ function showModal(modalName) {
         elements.settingAutoSave.checked = state.settings.autoSave;
         elements.settingShowNumbers.checked = state.settings.showQuestionNumbers;
         elements.modalSettings.classList.remove('hidden');
+    } else if (modalName === 'completion') {
+        elements.modalCompletion.classList.remove('hidden');
     }
 }
 
@@ -1641,7 +2050,66 @@ function showModal(modalName) {
 function hideModal(modalName) {
     if (modalName === 'settings') {
         elements.modalSettings.classList.add('hidden');
+    } else if (modalName === 'completion') {
+        elements.modalCompletion.classList.add('hidden');
     }
+}
+
+/**
+ * Show completion confirmation modal
+ */
+function showCompletionModal() {
+    const state = StateManager.getState();
+    const skippedScales = StateManager.getSkippedScales();
+    
+    // Build summary
+    let completedCount = 0;
+    let skippedCount = 0;
+    
+    state.scaleOrder.forEach(scaleId => {
+        const responses = StateManager.getScaleResponses(scaleId);
+        const hasResponses = Object.keys(responses || {}).length > 0;
+        const isSkipped = skippedScales.includes(scaleId) && !hasResponses;
+        
+        if (isSkipped) {
+            skippedCount++;
+        } else if (hasResponses) {
+            completedCount++;
+        }
+    });
+    
+    elements.completionSummary.innerHTML = `
+        <div class="completion-summary-item">
+            <span>Total Scales:</span>
+            <strong>${state.scaleOrder.length}</strong>
+        </div>
+        <div class="completion-summary-item">
+            <span>Completed:</span>
+            <strong style="color: var(--success);">${completedCount}</strong>
+        </div>
+        <div class="completion-summary-item">
+            <span>Skipped:</span>
+            <strong style="color: #ff9800;">${skippedCount}</strong>
+        </div>
+    `;
+    
+    showModal('completion');
+}
+
+/**
+ * Handle completion confirmation
+ */
+function handleConfirmCompletion() {
+    hideModal('completion');
+    
+    // Show loading overlay
+    elements.loadingOverlay.classList.remove('hidden');
+    
+    // Simulate calculation time (1 second)
+    setTimeout(() => {
+        elements.loadingOverlay.classList.add('hidden');
+        showResults();
+    }, 1000);
 }
 
 /**

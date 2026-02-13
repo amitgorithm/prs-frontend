@@ -36,12 +36,21 @@
                 </div>
             </div>
             <div class="header-actions">
-                <button class="btn-icon" id="btnNewSession" title="New Session">
-                    <i class="fas fa-plus"></i>
-                </button>
-                <button class="btn-icon" id="btnSettings" title="Settings">
-                    <i class="fas fa-cog"></i>
-                </button>
+                <div class="header-menu-wrapper">
+                    <button class="btn-icon" id="btnHeaderMenu" title="Menu">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <div class="header-dropdown hidden" id="headerDropdown">
+                        <button class="dropdown-item" id="btnMenuNewAssessment">
+                            <i class="fas fa-plus-circle"></i>
+                            New Assessment
+                        </button>
+                        <button class="dropdown-item" id="btnMenuSettings">
+                            <i class="fas fa-cog"></i>
+                            Settings
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     </header>
@@ -203,6 +212,9 @@
                         <button class="btn btn-warning btn-sm" id="btnDevPrefill" style="background: #f39c12; color: white; padding: 8px 16px; font-size: 12px;">
                             <i class="fas fa-magic"></i> Auto-Fill (Dev)
                         </button>
+                        <button class="btn btn-outline-danger btn-md" id="btnSkipScale" style="border: 2px solid #dc3545; color: #dc3545; background: white; padding: 10px 20px;">
+                            <i class="fas fa-forward"></i> Skip Scale
+                        </button>
                         <button class="btn btn-primary btn-lg" id="btnNextQuestion">
                             Next Scale
                             <i class="fas fa-arrow-right"></i>
@@ -280,6 +292,10 @@
 
                 <!-- Action Buttons -->
                 <div class="results-actions">
+                    <button class="btn btn-primary btn-lg" id="btnViewReport">
+                        <i class="fas fa-file-medical"></i>
+                        View Clinical Report
+                    </button>
                     <button class="btn btn-primary btn-lg" id="btnDownloadPDF">
                         <i class="fas fa-file-pdf"></i>
                         Download PDF Report
@@ -287,6 +303,10 @@
                     <button class="btn btn-success btn-lg" id="btnDownloadCSV">
                         <i class="fas fa-file-csv"></i>
                         Download Data (CSV)
+                    </button>
+                    <button class="btn btn-info btn-lg" id="btnEditResponses" style="background: #17a2b8;">
+                        <i class="fas fa-edit"></i>
+                        Edit Responses
                     </button>
                     <button class="btn btn-secondary" id="btnNewAssessment">
                         <i class="fas fa-plus"></i>
@@ -333,6 +353,39 @@
                     </label>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <!-- Completion Confirmation Modal -->
+    <div class="modal-overlay hidden" id="modalCompletion">
+        <div class="modal completion-modal">
+            <div class="modal-header">
+                <h3><i class="fas fa-clipboard-check"></i> Complete Assessment</h3>
+            </div>
+            <div class="modal-body">
+                <div class="completion-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <p class="completion-message">You have completed all scales in this assessment.</p>
+                <p class="completion-note">Once you proceed, scores will be calculated and you'll see the results. You can still edit responses later if needed.</p>
+                <div id="completionSummary" class="completion-summary"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="btnCompletionBack">
+                    <i class="fas fa-arrow-left"></i> Review Responses
+                </button>
+                <button class="btn btn-primary btn-lg" id="btnCompletionConfirm">
+                    <i class="fas fa-calculator"></i> Calculate Scores
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay hidden" id="loadingOverlay">
+        <div class="loading-spinner">
+            <i class="fas fa-spinner fa-spin"></i>
+            <p>Calculating scores...</p>
         </div>
     </div>
 

@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clinical Assessment Report — Sozo Brain Center</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="assets/favicon.ico">
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --sozo-orange: #F47920;
+            --sozo-blue: #1E88E5;
+            --gray-50: #f8fafc;
+            --gray-100: #f1f5f9;
+            --gray-200: #e2e8f0;
+            --gray-300: #cbd5e1;
+            --gray-500: #64748b;
+            --gray-600: #475569;
+            --gray-700: #334155;
+            --gray-800: #1e293b;
+            --gray-900: #0f172a;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--gray-50);
+            color: var(--gray-800);
+            line-height: 1.6;
+        }
+        
+        .report-container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+        }
+        
+        /* Header */
+        .report-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding: 30px 40px;
+            border-bottom: 3px solid var(--sozo-orange);
+        }
+        
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .logo-section img {
+            height: 60px;
+            width: auto;
+        }
+        
+        .contact-info {
+            text-align: right;
+            font-size: 12px;
+            color: var(--gray-600);
+        }
+        
+        .contact-info p {
+            margin: 3px 0;
+        }
+        
+        /* Patient Info */
+        .patient-info-section {
+            padding: 25px 40px;
+            background: var(--gray-50);
+            border-bottom: 1px solid var(--gray-200);
+        }
+        
+        .patient-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+        
+        .patient-field {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .patient-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--gray-500);
+            margin-bottom: 4px;
+        }
+        
+        .patient-value {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--gray-800);
+        }
+        
+        /* Section Headers */
+        .section-header {
+            padding: 20px 40px 10px;
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--gray-800);
+            border-bottom: 2px solid var(--sozo-orange);
+            margin: 20px 40px 0;
+        }
+        
+        /* Scale Tables */
+        .scale-section {
+            padding: 20px 40px;
+            border-bottom: 1px solid var(--gray-100);
+        }
+        
+        .scale-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--gray-800);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .scale-title-bold {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--gray-900);
+            margin-bottom: 12px;
+        }
+        
+        .scale-range {
+            font-size: 11px;
+            font-weight: 400;
+            color: var(--gray-500);
+        }
+        
+        .scale-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 10px;
+            font-size: 13px;
+        }
+        
+        .scale-table th,
+        .scale-table td {
+            border: 1px solid var(--gray-300);
+            padding: 10px 15px;
+            text-align: center;
+            vertical-align: middle;
+        }
+        
+        .scale-table th {
+            background: var(--gray-100);
+            font-weight: 600;
+            color: var(--gray-700);
+        }
+        
+        .scale-table th:first-child,
+        .scale-table td:first-child {
+            text-align: left;
+            font-weight: 500;
+        }
+        
+        .row-label {
+            font-weight: 500;
+            color: var(--gray-700);
+            background: var(--gray-50);
+            min-width: 120px;
+        }
+        
+        .score-cell {
+            font-weight: 500;
+        }
+        
+        .score-cell.has-value {
+            color: var(--gray-800);
+        }
+        
+        .score-cell.empty {
+            color: var(--gray-200);
+            background: var(--gray-50);
+        }
+        
+        .severity-label {
+            font-size: 11px;
+            color: var(--gray-500);
+            display: block;
+            margin-top: 3px;
+        }
+        
+        /* Severity Colors */
+        .severity-normal { color: #22c55e; }
+        .severity-mild { color: #84cc16; }
+        .severity-moderate { color: #eab308; }
+        .severity-severe { color: #ef4444; }
+        
+        /* Simple Scale (single score) */
+        .simple-scale {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--gray-100);
+        }
+        
+        .simple-scale:last-child {
+            border-bottom: none;
+        }
+        
+        .simple-scale-name {
+            flex: 1;
+            font-weight: 500;
+        }
+        
+        .simple-scale-score {
+            font-weight: 600;
+            min-width: 80px;
+            text-align: right;
+        }
+        
+        .simple-scale-severity {
+            min-width: 120px;
+            text-align: right;
+            font-size: 12px;
+        }
+        
+        /* Footer */
+        .report-footer {
+            padding: 30px 40px;
+            background: var(--gray-50);
+            border-top: 1px solid var(--gray-200);
+            margin-top: 30px;
+        }
+        
+        .privacy-notice {
+            font-size: 10px;
+            color: var(--gray-500);
+            line-height: 1.5;
+            margin-bottom: 15px;
+        }
+        
+        .footer-bottom {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 11px;
+            color: var(--gray-500);
+        }
+        
+        /* Print Styles */
+        @media print {
+            body {
+                background: white;
+            }
+            
+            .report-container {
+                box-shadow: none;
+            }
+            
+            .no-print {
+                display: none !important;
+            }
+            
+            .scale-section {
+                page-break-inside: avoid;
+            }
+        }
+        
+        /* Action Buttons */
+        .action-bar {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+            z-index: 100;
+        }
+        
+        .action-btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            transition: all 0.2s;
+        }
+        
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+        }
+        
+        .btn-print {
+            background: var(--sozo-orange);
+            color: white;
+        }
+        
+        .btn-back {
+            background: white;
+            color: var(--gray-700);
+            border: 1px solid var(--gray-300);
+        }
+        
+        /* Loading */
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 300px;
+            color: var(--gray-500);
+        }
+        
+        /* No Data Message */
+        .no-data {
+            text-align: center;
+            padding: 60px 40px;
+            color: var(--gray-500);
+        }
+        
+        .no-data h2 {
+            color: var(--gray-700);
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="report-container" id="reportContainer">
+        <div class="loading" id="loadingMessage">
+            Loading assessment data...
+        </div>
+    </div>
+    
+    <!-- Action Buttons -->
+    <div class="action-bar no-print">
+        <button class="action-btn btn-back" onclick="window.location.href='index.html'">
+            ← Back to Assessment
+        </button>
+        <button class="action-btn btn-print" onclick="window.print()">
+            🖨️ Print Report
+        </button>
+    </div>
+
+    <script type="module">
+        // Import state manager
+        import * as StateManager from './js/stateManager.js';
+        
+        // Initialize and render report
+        document.addEventListener('DOMContentLoaded', () => {
+            // Load state from localStorage (required since we're on a different page)
+            StateManager.loadFromLocalStorage();
+            renderReport();
+        });
+        
+        function renderReport() {
+            const container = document.getElementById('reportContainer');
+            const state = StateManager.getState();
+            const scores = StateManager.getAllScores();
+            
+            // Check if we have data
+            if (!state.patient_id || Object.keys(scores).length === 0) {
+                container.innerHTML = `
+                    <div class="no-data">
+                        <h2>No Assessment Data</h2>
+                        <p>Complete an assessment first to view the report.</p>
+                        <button class="action-btn btn-print" style="margin-top: 20px;" onclick="window.location.href='index.html'">
+                            Start Assessment
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Build report HTML
+            let html = `
+                <!-- Header -->
+                <div class="report-header">
+                    <div class="logo-section">
+                        <img src="assets/logo.png" alt="Sozo Brain Center">
+                    </div>
+                    <div class="contact-info">
+                        <p><strong>SOZO Brain Center</strong></p>
+                        <p>📞 +357 22 879000</p>
+                        <p>✉️ info@sozobraincenter.com</p>
+                        <p>🌐 www.sozobraincenter.com</p>
+                    </div>
+                </div>
+                
+                <!-- Patient Info -->
+                <div class="patient-info-section">
+                    <div class="patient-grid">
+                        <div class="patient-field">
+                            <span class="patient-label">Patient ID</span>
+                            <span class="patient-value">${state.patient_id || 'N/A'}</span>
+                        </div>
+                        <div class="patient-field">
+                            <span class="patient-label">Patient Name</span>
+                            <span class="patient-value">${state.patient_name || 'N/A'}</span>
+                        </div>
+                        <div class="patient-field">
+                            <span class="patient-label">Assessment Date</span>
+                            <span class="patient-value">${formatDate(state.session_start)}</span>
+                        </div>
+                        <div class="patient-field">
+                            <span class="patient-label">Condition</span>
+                            <span class="patient-value">${state.conditionLabel || state.condition || 'N/A'}</span>
+                        </div>
+                        <div class="patient-field">
+                            <span class="patient-label">Assessment Type</span>
+                            <span class="patient-value">Pre/Αρχική</span>
+                        </div>
+                        <div class="patient-field">
+                            <span class="patient-label">Report Generated</span>
+                            <span class="patient-value">${formatDate(new Date().toISOString())}</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Assessment Results -->
+                <h2 class="section-header">Assessment Results</h2>
+            `;
+            
+            // Render each scale result
+            Object.keys(scores).forEach(scaleId => {
+                const score = scores[scaleId];
+                html += renderScaleResult(scaleId, score);
+            });
+            
+            // Footer
+            html += `
+                <div class="report-footer">
+                    <p class="privacy-notice">
+                        SOZO Brain Center collects and processes data according to our Privacy Notice that has been prepared 
+                        in accordance with the provisions of the EU General Data Protection Regulation (GDPR) and can be found 
+                        on our website. This Privacy Notice is part of our commitment to ensure that we process any individuals' 
+                        personal data in accordance with the applicable laws and regulations.
+                    </p>
+                    <div class="footer-bottom">
+                        <span>Page 1 of 1</span>
+                        <span>PI_Assessment_${state.patient_id}_${new Date().toISOString().split('T')[0].replace(/-/g, '')}</span>
+                    </div>
+                </div>
+            `;
+            
+            container.innerHTML = html;
+        }
+        
+        function renderScaleResult(scaleId, score) {
+            // Check if scale has subscales, domains, or components
+            const hasSubscales = score.subscaleScores && Object.keys(score.subscaleScores).length > 0;
+            const hasDomains = score.domainScores && Object.keys(score.domainScores).length > 0;
+            const hasComponents = score.componentScores && Object.keys(score.componentScores).length > 0;
+            
+            if (hasDomains) {
+                // COMPASS-31 style: domains as columns with numeric values
+                return renderDomainScale(scaleId, score);
+            } else if (hasSubscales) {
+                // DASS-21 style: subscales as columns, Pre/Intra/Post as rows
+                return renderSubscaleTable(scaleId, score);
+            } else if (hasComponents) {
+                return renderComponentScale(scaleId, score);
+            } else {
+                // Simple scale: inline or table based on scale type
+                return renderSimpleScale(scaleId, score);
+            }
+        }
+        
+        // DASS-21 style: subscales as columns, time periods as rows
+        function renderSubscaleTable(scaleId, score) {
+            const items = score.subscaleScores;
+            const itemsArray = Array.isArray(items) ? items : Object.values(items);
+            
+            let headerCells = '';
+            let preCells = '';
+            
+            itemsArray.forEach(item => {
+                const name = item.name || item.id || 'Unknown';
+                const maxScore = item.maxScore || item.maxPossible || '-';
+                const itemScore = item.score ?? item.weighted ?? item.raw ?? '-';
+                const severity = item.severity?.label || '';
+                
+                headerCells += `
+                    <th>
+                        ${name}<br>
+                        <span class="scale-range">0-${maxScore} +</span>
+                    </th>
+                `;
+                preCells += `
+                    <td class="score-cell has-value">
+                        ${itemScore} points. ${severity}
+                    </td>
+                `;
+            });
+            
+            return `
+                <div class="scale-section">
+                    <div class="scale-title-bold">${score.scaleName || scaleId}</div>
+                    <table class="scale-table">
+                        <thead>
+                            <tr>
+                                <th></th>
+                                ${headerCells}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="row-label">Αρχική / Pre</td>
+                                ${preCells}
+                            </tr>
+                            <tr>
+                                <td class="row-label">Ενδιάμεση / Intra</td>
+                                ${itemsArray.map(() => '<td class="score-cell empty"></td>').join('')}
+                            </tr>
+                            <tr>
+                                <td class="row-label">Τελική / Post</td>
+                                ${itemsArray.map(() => '<td class="score-cell empty"></td>').join('')}
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        }
+        
+        // COMPASS-31 style: domains as columns with numeric values
+        function renderDomainScale(scaleId, score) {
+            const items = score.domainScores;
+            const itemsArray = Array.isArray(items) ? items : Object.values(items);
+            
+            let headerCells = '';
+            let preCells = '';
+            
+            itemsArray.forEach(item => {
+                const name = item.name || item.id || 'Unknown';
+                const itemScore = item.score ?? item.weighted ?? item.raw ?? 0;
+                
+                headerCells += `<th>${name}</th>`;
+                preCells += `<td class="score-cell has-value">${itemScore}</td>`;
+            });
+            
+            return `
+                <div class="scale-section">
+                    <div class="scale-title-bold">${score.scaleName || scaleId}</div>
+                    <table class="scale-table">
+                        <thead>
+                            <tr>
+                                <th></th>
+                                ${headerCells}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="row-label">Pre/Αρχική</td>
+                                ${preCells}
+                            </tr>
+                            <tr>
+                                <td class="row-label">Intra/Ενδιάμεση</td>
+                                ${itemsArray.map(() => '<td class="score-cell empty"></td>').join('')}
+                            </tr>
+                            <tr>
+                                <td class="row-label">Post/Τελική</td>
+                                ${itemsArray.map(() => '<td class="score-cell empty"></td>').join('')}
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        }
+        
+        // Component scales (like EQ-5D)
+        function renderComponentScale(scaleId, score) {
+            const items = score.componentScores;
+            const itemsArray = Array.isArray(items) ? items : Object.values(items);
+            
+            let headerCells = '';
+            let preCells = '';
+            
+            itemsArray.forEach(item => {
+                const name = item.name || item.id || 'Unknown';
+                const itemScore = item.score ?? item.weighted ?? item.raw ?? '-';
+                
+                headerCells += `<th>${name}</th>`;
+                preCells += `<td class="score-cell has-value">${itemScore}</td>`;
+            });
+            
+            return `
+                <div class="scale-section">
+                    <div class="scale-title-bold">${score.scaleName || scaleId}</div>
+                    <table class="scale-table">
+                        <thead>
+                            <tr>
+                                <th></th>
+                                ${headerCells}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="row-label">Pre/Αρχική</td>
+                                ${preCells}
+                            </tr>
+                            <tr>
+                                <td class="row-label">Intra/Ενδιάμεση</td>
+                                ${itemsArray.map(() => '<td class="score-cell empty"></td>').join('')}
+                            </tr>
+                            <tr>
+                                <td class="row-label">Post/Τελική</td>
+                                ${itemsArray.map(() => '<td class="score-cell empty"></td>').join('')}
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        }
+        
+        // Simple scale: Pre/Intra/Post as columns OR inline format
+        function renderSimpleScale(scaleId, score) {
+            const severityLabel = score.severity?.label || '';
+            const maxScore = score.maxPossible || '-';
+            
+            // Table format with Pre/Intra/Post columns
+            return `
+                <div class="scale-section">
+                    <div class="scale-title-bold">${score.scaleName || scaleId}</div>
+                    <table class="scale-table">
+                        <thead>
+                            <tr>
+                                <th>
+                                    Αρχική / Pre<br>
+                                    <span class="scale-range">0-${maxScore}</span>
+                                </th>
+                                <th>
+                                    Ενδιάμεση / Intra<br>
+                                    <span class="scale-range">0-${maxScore}</span>
+                                </th>
+                                <th>
+                                    Τελική / Post<br>
+                                    <span class="scale-range">0-${maxScore}</span>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="score-cell has-value">${score.total} points. ${severityLabel}</td>
+                                <td class="score-cell empty"></td>
+                                <td class="score-cell empty"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        }
+        
+        function getSeverityClass(level) {
+            if (!level) return '';
+            if (level === 'minimal' || level === 'normal') return 'severity-normal';
+            if (level === 'mild') return 'severity-mild';
+            if (level === 'moderate' || level === 'moderately-severe') return 'severity-moderate';
+            if (level === 'severe' || level === 'extreme') return 'severity-severe';
+            return '';
+        }
+        
+        function formatDate(dateString) {
+            if (!dateString) return 'N/A';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-GB', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric'
+            });
+        }
+    </script>
+</body>
+</html>

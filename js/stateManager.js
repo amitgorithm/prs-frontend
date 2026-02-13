@@ -25,11 +25,17 @@ const initialState = {
     currentScaleIndex: 0,
     currentQuestionIndex: 0,
     
+    // Highest scale index ever reached (for navigation)
+    highestScaleIndex: 0,
+    
     // Responses stored per scale: { "PHQ-9": { 1: 2, 2: 1, ... }, ... }
     responses: {},
     
     // Calculated scores per scale
     scores: {},
+    
+    // Skipped scales (array of scale IDs)
+    skippedScales: [],
     
     // Risk flags detected during assessment
     riskFlags: [],
@@ -64,8 +70,17 @@ function generateUUID() {
 
 /**
  * Initialize a new session
+ * Clears any existing state and creates fresh session
  */
 export function initSession() {
+    // First clear any existing localStorage data
+    try {
+        localStorage.removeItem(STORAGE_KEY);
+    } catch (error) {
+        console.warn('Failed to clear previous session:', error);
+    }
+    
+    // Create fresh state
     state = {
         ...initialState,
         patient_id: generateUUID(),
@@ -73,12 +88,59 @@ export function initSession() {
         session_start: new Date().toISOString(),
         responses: {},
         scores: {},
+        skippedScales: [],
         riskFlags: [],
+        highestScaleIndex: 0,
         settings: { ...initialState.settings }
     };
     saveToLocalStorage();
     notifyListeners();
     return state;
+}
+
+/**
+ * Skip a scale (mark it as skipped, no scoring)
+ * @param {string} scaleId - Scale identifier
+ */
+export function skipScale(scaleId) {
+    const skippedScales = [...(state.skippedScales || [])];
+    if (!skippedScales.includes(scaleId)) {
+        skippedScales.push(scaleId);
+    }
+    // Remove any existing responses/scores for this scale
+    const responses = { ...state.responses };
+    const scores = { ...state.scores };
+    delete responses[scaleId];
+    delete scores[scaleId];
+    
+    updateState({ skippedScales, responses, scores });
+    console.log(`StateManager: Skipped scale ${scaleId}`);
+}
+
+/**
+ * Unskip a scale (remove from skipped list)
+ * @param {string} scaleId - Scale identifier
+ */
+export function unskipScale(scaleId) {
+    const skippedScales = (state.skippedScales || []).filter(id => id !== scaleId);
+    updateState({ skippedScales });
+}
+
+/**
+ * Check if a scale is skipped
+ * @param {string} scaleId - Scale identifier
+ * @returns {boolean}
+ */
+export function isScaleSkipped(scaleId) {
+    return (state.skippedScales || []).includes(scaleId);
+}
+
+/**
+ * Get list of skipped scales
+ * @returns {Array}
+ */
+export function getSkippedScales() {
+    return [...(state.skippedScales || [])];
 }
 
 /**
@@ -143,7 +205,16 @@ export function recordResponse(scaleId, questionIndex, value) {
         responses[scaleId] = {};
     }
     responses[scaleId][questionIndex] = value;
-    updateState({ responses });
+    
+    // Auto-remove from skipped if user is filling in responses
+    let skippedScales = state.skippedScales || [];
+    if (skippedScales.includes(scaleId)) {
+        skippedScales = skippedScales.filter(id => id !== scaleId);
+        console.log(`StateManager: Auto-unskipping ${scaleId} - user is filling responses`);
+        updateState({ responses, skippedScales });
+    } else {
+        updateState({ responses });
+    }
 }
 
 /**
@@ -185,9 +256,16 @@ export function isScaleComplete(scaleId, totalQuestions) {
  * @param {Object} scoreData - Score data including total, severity, subscales, etc.
  */
 export function storeScore(scaleId, scoreData) {
+    // Validate that this scale is in current session
+    if (!state.scaleOrder.includes(scaleId)) {
+        console.warn(`StateManager: Refusing to store score for ${scaleId} - not in current session's scaleOrder`);
+        return;
+    }
+    
     const scores = { ...state.scores };
     scores[scaleId] = scoreData;
     updateState({ scores });
+    console.log(`StateManager: Stored score for ${scaleId}`, { totalScales: Object.keys(scores).length });
 }
 
 /**
@@ -228,9 +306,12 @@ export function navigatePrevious() {
  * Move to next scale
  */
 export function moveToNextScale() {
+    const nextIndex = state.currentScaleIndex + 1;
+    const newHighest = Math.max(state.highestScaleIndex || 0, nextIndex);
     updateState({
-        currentScaleIndex: state.currentScaleIndex + 1,
-        currentQuestionIndex: 0
+        currentScaleIndex: nextIndex,
+        currentQuestionIndex: 0,
+        highestScaleIndex: newHighest
     });
 }
 
@@ -326,10 +407,24 @@ export function getAllResponses() {
 
 /**
  * Get all scores for report generation
+ * Only returns scores for scales in the current session's scaleOrder
+ * Excludes skipped scales
  * @returns {Object} All scores
  */
 export function getAllScores() {
-    return { ...state.scores };
+    // Filter to only include scores for non-skipped scales in current session
+    const validScores = {};
+    const scaleOrder = state.scaleOrder || [];
+    const skippedScales = state.skippedScales || [];
+    
+    Object.keys(state.scores).forEach(scaleId => {
+        // Only include if scale is in current session's order AND not skipped
+        if (scaleOrder.includes(scaleId) && !skippedScales.includes(scaleId)) {
+            validScores[scaleId] = state.scores[scaleId];
+        }
+    });
+    
+    return validScores;
 }
 
 /**
@@ -361,5 +456,9 @@ export default {
     subscribe,
     getAllResponses,
     getAllScores,
-    getRiskFlags
+    getRiskFlags,
+    skipScale,
+    unskipScale,
+    isScaleSkipped,
+    getSkippedScales
 };
