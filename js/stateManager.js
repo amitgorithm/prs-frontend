@@ -16,9 +16,15 @@ const initialState = {
     patient_name: '',
     session_start: null,
     
-    // Selected condition and scale order
+    // Multiple conditions support
+    // conditions: [{id, label, scales: [...]}]
+    conditions: [],
+    
+    // Legacy single condition (for backward compat)
     condition: '',
     conditionLabel: '',
+    
+    // Merged unique scale order from all conditions
     scaleOrder: [],
     
     // Current position in the assessment
@@ -86,6 +92,7 @@ export function initSession() {
         patient_id: generateUUID(),
         patient_name: '',
         session_start: new Date().toISOString(),
+        conditions: [],
         responses: {},
         scores: {},
         skippedScales: [],
@@ -178,19 +185,96 @@ export function updateState(updates) {
  * Set the selected condition and its scale order
  * @param {string} conditionId - Condition identifier
  * @param {string} conditionLabel - Human-readable condition name
- * @param {Array} scaleOrder - Ordered array of scale IDs
+ * @param {Array} scales - Ordered array of scale IDs for this condition
  */
-export function setCondition(conditionId, conditionLabel, scaleOrder) {
+export function setCondition(conditionId, conditionLabel, scales) {
+    // Clear existing and set single condition (fresh start)
     updateState({
+        conditions: [{ id: conditionId, label: conditionLabel, scales: scales }],
         condition: conditionId,
         conditionLabel: conditionLabel,
-        scaleOrder: scaleOrder,
+        scaleOrder: scales,
         currentScaleIndex: 0,
         currentQuestionIndex: 0,
+        highestScaleIndex: 0,
         responses: {},
         scores: {},
+        skippedScales: [],
         riskFlags: []
     });
+}
+
+/**
+ * Add another condition to existing session
+ * Merges new scales with existing, skipping already-completed scales
+ * @param {string} conditionId - Condition identifier
+ * @param {string} conditionLabel - Human-readable condition name
+ * @param {Array} newScales - Scales for this condition
+ */
+export function addCondition(conditionId, conditionLabel, newScales) {
+    const conditions = [...(state.conditions || [])];
+    
+    // Check if this condition is already added
+    if (conditions.some(c => c.id === conditionId)) {
+        console.log(`StateManager: Condition ${conditionId} already exists`);
+        return;
+    }
+    
+    // Add the new condition
+    conditions.push({ id: conditionId, label: conditionLabel, scales: newScales });
+    
+    // Merge scales - add only new unique scales
+    const existingScales = state.scaleOrder || [];
+    const mergedScales = [...existingScales];
+    
+    newScales.forEach(scaleId => {
+        if (!mergedScales.includes(scaleId)) {
+            mergedScales.push(scaleId);
+        }
+    });
+    
+    // Update condition labels (join all)
+    const allLabels = conditions.map(c => c.label).join(' + ');
+    
+    // Find first incomplete scale index
+    let firstIncompleteIndex = 0;
+    for (let i = 0; i < mergedScales.length; i++) {
+        const scaleId = mergedScales[i];
+        const hasScore = state.scores && state.scores[scaleId];
+        const isSkipped = (state.skippedScales || []).includes(scaleId);
+        if (!hasScore && !isSkipped) {
+            firstIncompleteIndex = i;
+            break;
+        }
+    }
+    
+    updateState({
+        conditions: conditions,
+        condition: conditions.map(c => c.id).join('+'),
+        conditionLabel: allLabels,
+        scaleOrder: mergedScales,
+        currentScaleIndex: firstIncompleteIndex,
+        highestScaleIndex: Math.max(state.highestScaleIndex || 0, firstIncompleteIndex)
+    });
+    
+    console.log(`StateManager: Added condition ${conditionId}, merged scales:`, mergedScales);
+}
+
+/**
+ * Get all selected conditions
+ * @returns {Array} Array of condition objects
+ */
+export function getConditions() {
+    return [...(state.conditions || [])];
+}
+
+/**
+ * Check if a condition is already selected
+ * @param {string} conditionId
+ * @returns {boolean}
+ */
+export function hasCondition(conditionId) {
+    return (state.conditions || []).some(c => c.id === conditionId);
 }
 
 /**
@@ -441,6 +525,9 @@ export default {
     getState,
     updateState,
     setCondition,
+    addCondition,
+    getConditions,
+    hasCondition,
     recordResponse,
     getResponse,
     isScaleComplete,
@@ -460,5 +547,6 @@ export default {
     skipScale,
     unskipScale,
     isScaleSkipped,
-    getSkippedScales
+    getSkippedScales,
+    getScaleResponses
 };

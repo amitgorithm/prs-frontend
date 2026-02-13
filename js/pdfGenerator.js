@@ -125,9 +125,15 @@ export async function generateReport(options = {}) {
     doc.text(state.patient_name || 'N/A', margin + 50, boxY + 6);
     doc.text(formatDate(state.session_start), margin + 100, boxY + 6);
     
-    // Truncate condition if too long
-    const conditionText = state.conditionLabel || state.condition || 'N/A';
-    const shortCondition = conditionText.length > 20 ? conditionText.substring(0, 18) + '...' : conditionText;
+    // Get all condition labels (multi-condition support)
+    let conditionText = 'N/A';
+    if (state.conditions && state.conditions.length > 0) {
+        conditionText = state.conditions.map(c => c.label).join(' + ');
+    } else {
+        conditionText = state.conditionLabel || state.condition || 'N/A';
+    }
+    const shortCondition = conditionText.length > 25 ? conditionText.substring(0, 23) + '...' : conditionText;
+    doc.text(shortCondition, margin + 140, boxY + 6);
     doc.text(shortCondition, margin + 140, boxY + 6);
     
     doc.setFontSize(8);
