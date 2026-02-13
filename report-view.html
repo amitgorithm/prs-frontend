@@ -419,8 +419,8 @@
                             <span class="patient-value">${formatDate(state.session_start)}</span>
                         </div>
                         <div class="patient-field">
-                            <span class="patient-label">Condition</span>
-                            <span class="patient-value">${state.conditionLabel || state.condition || 'N/A'}</span>
+                            <span class="patient-label">Condition(s)</span>
+                            <span class="patient-value">${getConditionLabels(state)}</span>
                         </div>
                         <div class="patient-field">
                             <span class="patient-label">Assessment Type</span>
@@ -673,6 +673,15 @@
             if (level === 'moderate' || level === 'moderately-severe') return 'severity-moderate';
             if (level === 'severe' || level === 'extreme') return 'severity-severe';
             return '';
+        }
+        
+        function getConditionLabels(state) {
+            // Get all condition labels from conditions array
+            if (state.conditions && state.conditions.length > 0) {
+                return state.conditions.map(c => c.label).join(' + ');
+            }
+            // Fallback to single condition label
+            return state.conditionLabel || state.condition || 'N/A';
         }
         
         function formatDate(dateString) {

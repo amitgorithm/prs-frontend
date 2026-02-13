@@ -16,6 +16,7 @@ import * as PDFGenerator from './pdfGenerator.js';
 let conditionMap = {};
 let currentScale = null;
 let scales = {};  // Cache loaded scales
+let isAddConditionMode = false;  // Track if adding condition to existing session
 
 // ========================================
 // DOM ELEMENT REFERENCES
@@ -79,6 +80,7 @@ const elements = {
     btnDownloadCSV: document.getElementById('btnDownloadCSV'),
     btnNewAssessment: document.getElementById('btnNewAssessment'),
     btnEditResponses: document.getElementById('btnEditResponses'),
+    btnAddCondition: document.getElementById('btnAddCondition'),
     
     // Header Menu
     btnHeaderMenu: document.getElementById('btnHeaderMenu'),
@@ -327,6 +329,11 @@ function setupEventListeners() {
     elements.btnNewAssessment.addEventListener('click', handleNewAssessment);
     elements.btnEditResponses.addEventListener('click', handleEditResponses);
     
+    // Add another condition
+    if (elements.btnAddCondition) {
+        elements.btnAddCondition.addEventListener('click', handleAddCondition);
+    }
+    
     // Skip scale button
     if (elements.btnSkipScale) {
         elements.btnSkipScale.addEventListener('click', handleSkipScale);
@@ -440,6 +447,23 @@ function handleProceedToCondition() {
     elements.displayPatientName.textContent = patientName;
     elements.displayPatientId.textContent = currentPatientId;
     
+    // Reset add mode (this is a fresh condition selection)
+    isAddConditionMode = false;
+    
+    // Reset condition selection UI
+    document.querySelectorAll('.condition-card').forEach(card => {
+        card.classList.remove('selected', 'already-selected');
+        card.style.opacity = '';
+        card.style.pointerEvents = '';
+    });
+    elements.selectedConditionPanel.classList.add('hidden');
+    
+    // Update header
+    const conditionHeader = document.querySelector('#screenCondition h1');
+    if (conditionHeader) {
+        conditionHeader.textContent = 'Select Condition';
+    }
+    
     // Show condition screen
     showScreen('condition');
 }
@@ -450,6 +474,11 @@ function handleProceedToCondition() {
 let selectedConditionId = null;
 
 function handleConditionCardClick(conditionId, condition) {
+    // Check if this condition is already selected (in add mode)
+    if (isAddConditionMode && StateManager.hasCondition(conditionId)) {
+        return; // Don't allow re-selecting same condition
+    }
+    
     // Remove selection from all cards
     document.querySelectorAll('.condition-card').forEach(card => {
         card.classList.remove('selected');
@@ -467,16 +496,40 @@ function handleConditionCardClick(conditionId, condition) {
     // Update panel info
     elements.selectedConditionName.textContent = condition.label;
     elements.selectedConditionDesc.textContent = condition.description || '';
-    elements.scaleCount.textContent = condition.scales.length;
     
-    // Populate scale list
+    // In add mode, show which scales are new vs already done
+    const state = StateManager.getState();
+    const existingScales = state.scaleOrder || [];
+    const completedScales = Object.keys(state.scores || {});
+    
+    let newScalesCount = 0;
+    let alreadyDoneCount = 0;
+    
+    // Populate scale list with status
     elements.scaleList.innerHTML = '';
     condition.scales.forEach(scaleId => {
         const li = document.createElement('li');
         const metadata = conditionMap.scaleMetadata?.[scaleId];
-        li.textContent = metadata?.name || scaleId;
+        const isCompleted = completedScales.includes(scaleId);
+        
+        if (isAddConditionMode && isCompleted) {
+            li.innerHTML = `<span style="color: #28a745;">✓</span> ${metadata?.name || scaleId} <small style="color:#6c757d;">(already done)</small>`;
+            alreadyDoneCount++;
+        } else if (isAddConditionMode && existingScales.includes(scaleId)) {
+            li.innerHTML = `<span style="color: #ffc107;">○</span> ${metadata?.name || scaleId} <small style="color:#6c757d;">(pending)</small>`;
+        } else {
+            li.textContent = metadata?.name || scaleId;
+            newScalesCount++;
+        }
         elements.scaleList.appendChild(li);
     });
+    
+    // Update scale count
+    if (isAddConditionMode) {
+        elements.scaleCount.textContent = `${condition.scales.length} (${newScalesCount} new)`;
+    } else {
+        elements.scaleCount.textContent = condition.scales.length;
+    }
     
     // Show panel
     elements.selectedConditionPanel.classList.remove('hidden');
@@ -484,8 +537,11 @@ function handleConditionCardClick(conditionId, condition) {
     // Scroll panel into view
     elements.selectedConditionPanel.scrollIntoView({ behavior: 'smooth', block: 'center' });
     
-    // Set condition in state
-    StateManager.setCondition(conditionId, condition.label, condition.scales);
+    // Only set condition immediately if NOT in add mode
+    // In add mode, wait for Start Assessment button click
+    if (!isAddConditionMode) {
+        StateManager.setCondition(conditionId, condition.label, condition.scales);
+    }
 }
 
 /**
@@ -507,12 +563,36 @@ function handleChangeCondition() {
 async function handleStartAssessment() {
     const state = StateManager.getState();
     
-    if (!state.condition || state.scaleOrder.length === 0) {
+    // In add mode, apply the new condition
+    if (isAddConditionMode) {
+        if (!selectedConditionId) {
+            showError('Please select a condition first.');
+            return;
+        }
+        
+        const condition = conditionMap.conditions[selectedConditionId];
+        if (!condition) {
+            showError('Invalid condition selected.');
+            return;
+        }
+        
+        // Add the new condition (merges scales)
+        StateManager.addCondition(selectedConditionId, condition.label, condition.scales);
+        
+        // Reset add mode flag
+        isAddConditionMode = false;
+        
+        console.log('Added condition, starting assessment with merged scales');
+    }
+    
+    // Verify we have a condition set
+    const updatedState = StateManager.getState();
+    if (!updatedState.condition || updatedState.scaleOrder.length === 0) {
         showError('Please select a condition first.');
         return;
     }
     
-    // Load the first scale
+    // Load the current scale (will be first incomplete scale in add mode)
     try {
         await loadCurrentScale();
         showScreen('assessment');
@@ -604,6 +684,7 @@ function renderScaleNavigation() {
     const state = StateManager.getState();
     const skippedScales = StateManager.getSkippedScales();
     const highestReached = state.highestScaleIndex || 0;
+    const existingScores = state.scores || {};
     
     let html = '';
     state.scaleOrder.forEach((scaleId, index) => {
@@ -612,13 +693,17 @@ function renderScaleNavigation() {
         const responses = StateManager.getScaleResponses(scaleId);
         const answeredCount = Object.keys(responses || {}).length;
         const hasResponses = answeredCount > 0;
+        const hasScore = existingScores[scaleId] !== undefined;
         
         // A scale is only "skipped" if it's in the skipped list AND has no responses
         const isSkipped = skippedScales.includes(scaleId) && !hasResponses;
-        const isCompleted = hasResponses || index < highestReached;
         
-        // Clickable if: acted upon (index < highestReached) AND not current scale
-        const isClickable = index < highestReached && index !== state.currentScaleIndex;
+        // Completed if: has responses, has score, or index < highestReached
+        const isCompleted = hasResponses || hasScore || index < highestReached;
+        
+        // Clickable if: has score (already done) OR (index < highestReached AND not current)
+        const isClickable = (hasScore && index !== state.currentScaleIndex) || 
+                           (index < highestReached && index !== state.currentScaleIndex);
         
         let status = 'pending';
         if (isSkipped) status = 'skipped';
@@ -655,25 +740,29 @@ function renderScaleNavigation() {
     const completedCount = state.scaleOrder.filter((scaleId) => {
         const responses = StateManager.getScaleResponses(scaleId);
         const hasResponses = Object.keys(responses || {}).length > 0;
+        const hasScore = existingScores[scaleId] !== undefined;
         const isSkipped = skippedScales.includes(scaleId) && !hasResponses;
-        return hasResponses || isSkipped;
+        return hasResponses || hasScore || isSkipped;
     }).length;
     const progress = Math.round((completedCount / state.scaleOrder.length) * 100);
     elements.progressPercent.textContent = `${progress}%`;
 }
 
 /**
- * Navigate to a specific scale by index (only acted-upon scales allowed)
+ * Navigate to a specific scale by index
  */
 async function navigateToScale(targetIndex) {
     const state = StateManager.getState();
     const highestReached = state.highestScaleIndex || 0;
+    const scaleId = state.scaleOrder[targetIndex];
+    const hasScore = state.scores && state.scores[scaleId];
     
     if (targetIndex < 0 || targetIndex >= state.scaleOrder.length) return;
     if (targetIndex === state.currentScaleIndex) return;
     
-    // Can only navigate to scales already acted upon
-    if (targetIndex >= highestReached) {
+    // Can navigate to: scales with scores, or scales index < highestReached
+    const canNavigate = hasScore || targetIndex < highestReached;
+    if (!canNavigate) {
         console.log('Cannot navigate to scale not yet reached');
         return;
     }
@@ -1411,6 +1500,7 @@ function showResults() {
     const state = StateManager.getState();
     const scores = StateManager.getAllScores();
     const riskFlags = StateManager.getRiskFlags();
+    const conditions = StateManager.getConditions();
     
     // Patient info
     elements.resultPatientId.textContent = state.patient_id;
@@ -1421,7 +1511,10 @@ function showResults() {
         hour: '2-digit',
         minute: '2-digit'
     });
-    elements.resultCondition.textContent = state.conditionLabel;
+    
+    // Show all conditions (joined by +)
+    const conditionLabels = conditions.map(c => c.label).join(' + ');
+    elements.resultCondition.textContent = conditionLabels || state.conditionLabel;
     
     // Risk flags - hidden per user request
     elements.riskFlagsCard.classList.add('hidden');
@@ -1431,8 +1524,20 @@ function showResults() {
         return renderScaleResultCard(score);
     }).join('');
     
-    // Composite summary
-    const summary = ScaleEngine.generateCompositeSummary(scores, conditionMap.conditions[state.condition]);
+    // Composite summary for all conditions
+    let summary = '';
+    conditions.forEach(cond => {
+        const condConfig = conditionMap.conditions[cond.id];
+        if (condConfig) {
+            const condSummary = ScaleEngine.generateCompositeSummary(scores, condConfig);
+            if (summary) summary += '<br><br>';
+            summary += `<strong>${cond.label}:</strong> ${condSummary}`;
+        }
+    });
+    if (!summary) {
+        // Fallback for single condition
+        summary = ScaleEngine.generateCompositeSummary(scores, conditionMap.conditions[state.condition]);
+    }
     elements.compositeSummary.innerHTML = `<p>${summary}</p>`;
     
     showScreen('results');
@@ -1726,10 +1831,16 @@ function handleDownloadCSV() {
             // Get subscales if any
             const subscales = score.subscaleScores ? Object.values(score.subscaleScores) : [];
             
+            // Get all condition labels (multi-condition support)
+            const conditions = StateManager.getConditions();
+            const conditionLabels = conditions.length > 0 
+                ? conditions.map(c => c.label).join(' + ')
+                : (state.conditionLabel || state.condition || '');
+            
             const row = [
                 escapeCSV(state.patient_id || ''),
                 escapeCSV(state.patient_name || ''),
-                escapeCSV(state.conditionLabel || state.condition || ''),
+                escapeCSV(conditionLabels),
                 escapeCSV(date),
                 'Pre',
                 escapeCSV(scaleId),
@@ -1935,6 +2046,63 @@ function handleNewAssessment() {
     elements.selectedConditionPanel.classList.add('hidden');
     
     showScreen('patient');
+}
+
+/**
+ * Handle adding another condition to existing session
+ */
+function handleAddCondition() {
+    console.log('Adding another condition to existing session');
+    
+    // Set flag to indicate we're in add mode
+    isAddConditionMode = true;
+    
+    // Reset selection state but keep data
+    selectedConditionId = null;
+    
+    // Update condition screen for add mode
+    populateConditionGrid();
+    updateConditionScreenForAddMode();
+    
+    // Show condition screen
+    showScreen('condition');
+}
+
+/**
+ * Update condition screen UI when in add mode
+ */
+function updateConditionScreenForAddMode() {
+    const state = StateManager.getState();
+    const existingConditions = StateManager.getConditions();
+    
+    // Update header text
+    const conditionHeader = document.querySelector('#screenCondition h1');
+    if (conditionHeader) {
+        if (isAddConditionMode) {
+            conditionHeader.textContent = 'Add Another Condition';
+        } else {
+            conditionHeader.textContent = 'Select Condition';
+        }
+    }
+    
+    // Disable already-selected condition cards and mark them
+    document.querySelectorAll('.condition-card').forEach(card => {
+        const conditionId = card.dataset.conditionId;
+        const isAlreadySelected = existingConditions.some(c => c.id === conditionId);
+        
+        if (isAlreadySelected) {
+            card.classList.add('already-selected');
+            card.style.opacity = '0.5';
+            card.style.pointerEvents = 'none';
+        } else {
+            card.classList.remove('already-selected');
+            card.style.opacity = '';
+            card.style.pointerEvents = '';
+        }
+    });
+    
+    // Hide selection panel initially
+    elements.selectedConditionPanel.classList.add('hidden');
 }
 
 /**
