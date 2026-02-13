@@ -1,38 +1,23 @@
 /**
  * =============================================
- * PDF GENERATOR
- * Generates clinical assessment PDF reports
- * using jsPDF library
+ * PDF GENERATOR - Clean Clinical Report
+ * Simple vertical layout - no overlapping
  * =============================================
  */
 
 import * as StateManager from './stateManager.js';
 
-// jsPDF will be loaded from CDN
 let jsPDF = null;
 
-// Scales where higher score = better outcome
-const HIGHER_IS_BETTER_SCALES = [
-    'ALSFRS-R', 'AMTS', 'Barthel-Index', 'IADL', 'KPS', 'MRC', 
-    'SS-QOL', 'MSQ', 'EQ-5D-5L', 'GPCOG'
-];
-
 /**
- * Check if higher score is better for a scale
- */
-function isHigherBetter(scaleId) {
-    return HIGHER_IS_BETTER_SCALES.includes(scaleId);
-}
-
-/**
- * Initialize jsPDF from global scope (loaded via CDN)
+ * Initialize jsPDF from global scope
  */
 function initJsPDF() {
     if (window.jspdf && window.jspdf.jsPDF) {
         jsPDF = window.jspdf.jsPDF;
         return true;
     }
-    console.error('jsPDF not loaded. Please ensure the library is included.');
+    console.error('jsPDF not loaded');
     return false;
 }
 
@@ -40,36 +25,29 @@ function initJsPDF() {
  * Format date for display
  */
 function formatDate(dateString) {
+    if (!dateString) return 'N/A';
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
+    return date.toLocaleDateString('en-GB', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
     });
 }
 
 /**
- * Get severity color for PDF
+ * Check and add page if needed
  */
-function getSeverityColor(level) {
-    const colors = {
-        minimal: [34, 197, 94],      // Green
-        mild: [132, 204, 22],        // Light green
-        moderate: [234, 179, 8],     // Yellow
-        'moderately-severe': [249, 115, 22], // Orange
-        severe: [239, 68, 68],       // Red
-        unknown: [148, 163, 184]     // Gray
-    };
-    return colors[level] || colors.unknown;
+function checkPageBreak(doc, y, neededHeight, margin) {
+    const pageHeight = doc.internal.pageSize.getHeight();
+    if (y + neededHeight > pageHeight - 25) {
+        doc.addPage();
+        return margin;
+    }
+    return y;
 }
 
 /**
  * Generate the PDF report
- * 
- * @param {Object} options - Generation options
- * @returns {Promise<Blob>} PDF blob
  */
 export async function generateReport(options = {}) {
     if (!initJsPDF()) {
@@ -78,9 +56,7 @@ export async function generateReport(options = {}) {
     
     const state = StateManager.getState();
     const scores = StateManager.getAllScores();
-    const riskFlags = StateManager.getRiskFlags();
     
-    // Create PDF document
     const doc = new jsPDF({
         orientation: 'portrait',
         unit: 'mm',
@@ -89,7 +65,7 @@ export async function generateReport(options = {}) {
     
     const pageWidth = doc.internal.pageSize.getWidth();
     const pageHeight = doc.internal.pageSize.getHeight();
-    const margin = 20;
+    const margin = 15;
     const contentWidth = pageWidth - (margin * 2);
     let y = margin;
     
@@ -97,263 +73,370 @@ export async function generateReport(options = {}) {
     // HEADER
     // ========================================
     
-    // Sozo orange header bar
-    doc.setFillColor(244, 121, 32);
-    doc.rect(0, 0, pageWidth, 35, 'F');
-    
-    // Title
-    doc.setTextColor(255, 255, 255);
+    // Logo
     doc.setFontSize(20);
     doc.setFont('helvetica', 'bold');
-    doc.text('PRS Assessment Report', margin, 18);
-    
-    doc.setFontSize(10);
-    doc.setFont('helvetica', 'normal');
-    doc.text('Sozo Brain Center — Patient Rating System', margin, 27);
-    
-    y = 50;
-    
-    // ========================================
-    // PATIENT INFORMATION
-    // ========================================
-    
-    doc.setTextColor(30, 41, 59); // Gray-800
-    doc.setFontSize(12);
-    doc.setFont('helvetica', 'bold');
-    doc.text('Patient Information', margin, y);
-    y += 8;
-    
-    // Info box
-    doc.setDrawColor(226, 232, 240); // Gray-200
-    doc.setFillColor(248, 250, 252); // Gray-50
-    doc.roundedRect(margin, y, contentWidth, 30, 3, 3, 'FD');
+    doc.setTextColor(244, 121, 32);
+    doc.text('SOZO', margin, y + 6);
     
     doc.setFontSize(9);
     doc.setFont('helvetica', 'normal');
-    doc.setTextColor(100, 116, 139); // Gray-500
+    doc.setTextColor(80, 80, 80);
+    doc.text('BRAIN CENTER', margin, y + 11);
     
-    const col1 = margin + 5;
-    const col2 = margin + 70;
+    // Contact
+    const rightX = pageWidth - margin;
+    doc.setFontSize(8);
+    doc.text('+357 22 879000', rightX, y + 3, { align: 'right' });
+    doc.text('info@sozobraincenter.com', rightX, y + 7, { align: 'right' });
+    doc.text('www.sozobraincenter.com', rightX, y + 11, { align: 'right' });
+    
+    y += 16;
+    
+    // Orange divider
+    doc.setDrawColor(244, 121, 32);
+    doc.setLineWidth(1);
+    doc.line(margin, y, pageWidth - margin, y);
     
     y += 8;
-    doc.text('Patient ID:', col1, y);
-    doc.text('Assessment Date:', col2, y);
-    
-    doc.setTextColor(30, 41, 59);
-    doc.setFont('helvetica', 'bold');
-    y += 5;
-    doc.text(state.patient_id || 'N/A', col1, y);
-    doc.text(formatDate(state.session_start), col2, y);
-    
-    y += 7;
-    doc.setFont('helvetica', 'normal');
-    doc.setTextColor(100, 116, 139);
-    doc.text('Condition:', col1, y);
-    
-    doc.setTextColor(30, 41, 59);
-    doc.setFont('helvetica', 'bold');
-    y += 5;
-    doc.text(state.conditionLabel || state.condition || 'N/A', col1, y);
-    
-    y += 15;
     
     // ========================================
-    // SCALES ADMINISTERED
+    // PATIENT INFORMATION BOX
+    // ========================================
+    
+    doc.setFillColor(248, 248, 248);
+    doc.rect(margin, y, contentWidth, 22, 'F');
+    doc.setDrawColor(200, 200, 200);
+    doc.setLineWidth(0.3);
+    doc.rect(margin, y, contentWidth, 22);
+    
+    const boxY = y + 5;
+    doc.setFontSize(8);
+    doc.setTextColor(100, 100, 100);
+    doc.text('PATIENT ID', margin + 4, boxY);
+    doc.text('PATIENT NAME', margin + 50, boxY);
+    doc.text('DATE', margin + 100, boxY);
+    doc.text('CONDITION', margin + 140, boxY);
+    
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(30, 30, 30);
+    doc.text(state.patient_id || 'N/A', margin + 4, boxY + 6);
+    doc.text(state.patient_name || 'N/A', margin + 50, boxY + 6);
+    doc.text(formatDate(state.session_start), margin + 100, boxY + 6);
+    
+    // Truncate condition if too long
+    const conditionText = state.conditionLabel || state.condition || 'N/A';
+    const shortCondition = conditionText.length > 20 ? conditionText.substring(0, 18) + '...' : conditionText;
+    doc.text(shortCondition, margin + 140, boxY + 6);
+    
+    doc.setFontSize(8);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(100, 100, 100);
+    doc.text('Assessment Type: Pre / Αρχική', margin + 4, boxY + 12);
+    
+    y += 28;
+    
+    // ========================================
+    // SECTION HEADER: ASSESSMENT RESULTS
+    // ========================================
+    
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(30, 30, 30);
+    doc.text('Assessment Results', margin, y);
+    
+    y += 3;
+    doc.setDrawColor(244, 121, 32);
+    doc.setLineWidth(0.5);
+    doc.line(margin, y, margin + 40, y);
+    
+    y += 8;
+    
+    // ========================================
+    // RENDER EACH SCALE
     // ========================================
     
     const scaleIds = Object.keys(scores);
     
-    doc.setTextColor(30, 41, 59);
-    doc.setFontSize(12);
-    doc.setFont('helvetica', 'bold');
-    doc.text('Scales Administered', margin, y);
-    y += 6;
-    
-    doc.setFontSize(9);
-    doc.setFont('helvetica', 'normal');
-    doc.setTextColor(71, 85, 105); // Gray-600
-    
-    // List scale names in a comma-separated format
-    const scaleNames = scaleIds.map(id => scores[id].scaleName || id);
-    const scaleListText = scaleNames.join(', ');
-    
-    // Wrap text if too long
-    const splitText = doc.splitTextToSize(scaleListText, contentWidth);
-    doc.text(splitText, margin, y);
-    y += splitText.length * 4 + 8;
-    
-    // ========================================
-    // SCALE RESULTS - 2-COLUMN GRID LAYOUT
-    // ========================================
-    
-    doc.setTextColor(30, 41, 59);
-    doc.setFontSize(12);
-    doc.setFont('helvetica', 'bold');
-    doc.text('Assessment Results', margin, y);
-    y += 10;
-    
-    // scaleIds already declared above for "Scales Administered" section
-    const colWidth = (contentWidth - 5) / 2; // Two columns with 5mm gap
-    const boxHeight = 28;
-    let col = 0; // 0 = left, 1 = right
-    let rowStartY = y;
-    
-    scaleIds.forEach((scaleId, index) => {
+    scaleIds.forEach((scaleId, scaleIndex) => {
         const score = scores[scaleId];
         
-        // Check if we need a new page
-        if (rowStartY > pageHeight - 45) {
-            doc.addPage();
-            rowStartY = margin;
-            y = margin;
-            col = 0;
+        // Determine table height needed
+        const hasSubscales = score.subscaleScores && Object.keys(score.subscaleScores).length > 0;
+        const hasDomains = score.domainScores && Object.keys(score.domainScores).length > 0;
+        
+        let tableHeight = 30; // Base height
+        if (hasSubscales) {
+            const subscaleCount = Object.keys(score.subscaleScores).length;
+            tableHeight = 20 + (subscaleCount * 7);
+        } else if (hasDomains) {
+            const domainCount = Object.keys(score.domainScores).length;
+            tableHeight = 20 + (domainCount * 7);
         }
         
-        // Calculate box position
-        const boxX = margin + (col * (colWidth + 5));
-        const boxY = rowStartY;
+        // Check page break BEFORE drawing
+        y = checkPageBreak(doc, y, tableHeight + 10, margin + 5);
         
-        // Draw box
-        doc.setDrawColor(226, 232, 240);
-        doc.setFillColor(248, 250, 252);
-        doc.roundedRect(boxX, boxY, colWidth, boxHeight, 2, 2, 'FD');
+        // Scale Box
+        doc.setFillColor(255, 255, 255);
+        doc.setDrawColor(200, 200, 200);
+        doc.setLineWidth(0.3);
         
-        // Scale name (truncate if too long)
+        // Scale Header Bar
+        doc.setFillColor(50, 50, 50);
+        doc.rect(margin, y, contentWidth, 8, 'F');
+        
         doc.setFontSize(9);
         doc.setFont('helvetica', 'bold');
-        doc.setTextColor(30, 41, 59);
-        let scaleName = score.scaleName || scaleId;
-        if (scaleName.length > 30) scaleName = scaleName.substring(0, 28) + '...';
-        doc.text(scaleName, boxX + 4, boxY + 7);
-        
-        // Score - large and prominent
-        doc.setFontSize(16);
-        doc.setFont('helvetica', 'bold');
-        const scoreText = `${score.total}`;
-        const scoreTextWidth = doc.getTextWidth(scoreText); // Measure at font size 16
-        doc.text(scoreText, boxX + 4, boxY + 18);
-        
-        // Max score
-        doc.setFontSize(9);
-        doc.setFont('helvetica', 'normal');
-        doc.setTextColor(100, 116, 139);
-        const maxText = `/ ${score.maxPossible}`;
-        doc.text(maxText, boxX + 4 + scoreTextWidth + 1, boxY + 18);
-        
-        // Score direction indicator (higher = better or worse)
-        const maxTextWidth = doc.getTextWidth(maxText);
-        const directionX = boxX + 4 + scoreTextWidth + 1 + maxTextWidth + 3;
-        doc.setFontSize(7);
-        if (isHigherBetter(scaleId)) {
-            doc.setTextColor(34, 197, 94); // Green
-            doc.text('(↑ better)', directionX, boxY + 18);
-        } else {
-            doc.setTextColor(239, 68, 68); // Red
-            doc.text('(↑ worse)', directionX, boxY + 18);
-        }
-        
-        // Severity badge on the right side
-        const severityColor = getSeverityColor(score.severity?.level);
-        doc.setFillColor(...severityColor);
         doc.setTextColor(255, 255, 255);
-        doc.setFontSize(7);
-        doc.setFont('helvetica', 'bold');
+        doc.text(`${scaleIndex + 1}. ${score.scaleName || scaleId}`, margin + 3, y + 5.5);
         
-        const severityLabel = score.severity?.label || 'N/A';
-        const badgeWidth = Math.min(doc.getTextWidth(severityLabel) + 6, colWidth - 10);
-        doc.roundedRect(boxX + colWidth - badgeWidth - 4, boxY + 4, badgeWidth, 5, 1.5, 1.5, 'F');
-        doc.text(severityLabel, boxX + colWidth - badgeWidth - 1, boxY + 7.5);
+        y += 8;
         
-        // Percentage bar
-        const barWidth = colWidth - 8;
-        const barHeight = 3;
-        const barY = boxY + 22;
-        doc.setFillColor(226, 232, 240);
-        doc.roundedRect(boxX + 4, barY, barWidth, barHeight, 1, 1, 'F');
+        // Content area
+        const contentStartY = y;
         
-        const fillWidth = (score.percentage / 100) * barWidth;
-        doc.setFillColor(...severityColor);
-        doc.roundedRect(boxX + 4, barY, fillWidth, barHeight, 1, 1, 'F');
-        
-        // Percentage text
-        doc.setFontSize(7);
-        doc.setTextColor(100, 116, 139);
-        doc.text(`${score.percentage}%`, boxX + colWidth - 4 - doc.getTextWidth(`${score.percentage}%`), barY + 2.5);
-        
-        // Move to next column or next row
-        col++;
-        if (col >= 2) {
-            col = 0;
-            rowStartY += boxHeight + 4;
+        if (hasSubscales) {
+            y = renderSubscales(doc, score, margin, y, contentWidth);
+        } else if (hasDomains) {
+            y = renderDomains(doc, score, margin, y, contentWidth);
+        } else {
+            y = renderSimpleScore(doc, score, margin, y, contentWidth);
         }
+        
+        // Draw box around content
+        doc.setDrawColor(200, 200, 200);
+        doc.rect(margin, contentStartY, contentWidth, y - contentStartY);
+        
+        y += 6;
     });
-    
-    // Reset y position after grid
-    if (col === 1) {
-        y = rowStartY + boxHeight + 10;
-    } else {
-        y = rowStartY + 10;
-    }
     
     // ========================================
     // FOOTER
     // ========================================
     
-    // Add footer to all pages
     const totalPages = doc.internal.getNumberOfPages();
     
     for (let i = 1; i <= totalPages; i++) {
         doc.setPage(i);
+        const footerY = pageHeight - 12;
         
-        // Footer line
-        doc.setDrawColor(226, 232, 240);
-        doc.line(margin, pageHeight - 20, pageWidth - margin, pageHeight - 20);
+        doc.setDrawColor(200, 200, 200);
+        doc.setLineWidth(0.3);
+        doc.line(margin, footerY, pageWidth - margin, footerY);
         
-        // Disclaimer
         doc.setFontSize(7);
         doc.setFont('helvetica', 'normal');
-        doc.setTextColor(148, 163, 184);
-        doc.text(
-            'This report is generated for clinical reference only. All assessments should be interpreted by qualified healthcare professionals.',
-            margin,
-            pageHeight - 14
-        );
-        
-        // Page number
-        doc.text(
-            `Page ${i} of ${totalPages}`,
-            pageWidth - margin - 20,
-            pageHeight - 14
-        );
-        
-        // Generation timestamp
-        doc.text(
-            `Generated: ${formatDate(new Date().toISOString())}`,
-            margin,
-            pageHeight - 9
-        );
+        doc.setTextColor(120, 120, 120);
+        doc.text('SOZO Brain Center | Confidential Patient Report | GDPR Compliant', margin, footerY + 5);
+        doc.text(`Page ${i} of ${totalPages}`, pageWidth - margin, footerY + 5, { align: 'right' });
     }
     
     return doc;
 }
 
 /**
+ * Render subscales in vertical list
+ */
+function renderSubscales(doc, score, margin, y, contentWidth) {
+    const items = score.subscaleScores;
+    const itemsArray = Array.isArray(items) ? items : Object.values(items);
+    
+    // Column headers
+    const col1 = margin + 3;
+    const col2 = margin + 70;
+    const col3 = margin + 100;
+    const col4 = margin + 135;
+    
+    doc.setFontSize(7);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(100, 100, 100);
+    doc.text('SUBSCALE', col1, y + 5);
+    doc.text('PRE', col2, y + 5);
+    doc.text('INTRA', col3, y + 5);
+    doc.text('POST', col4, y + 5);
+    
+    y += 7;
+    doc.setDrawColor(220, 220, 220);
+    doc.line(margin, y, margin + contentWidth, y);
+    y += 2;
+    
+    // Subscale rows
+    itemsArray.forEach((item, idx) => {
+        const name = item.name || item.id || `Subscale ${idx + 1}`;
+        const itemScore = item.score ?? item.weighted ?? item.raw ?? '-';
+        const maxScore = item.maxScore || item.maxPossible || '?';
+        const severity = item.severity?.label || '';
+        
+        doc.setFontSize(8);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(30, 30, 30);
+        doc.text(name, col1, y + 4);
+        
+        // Pre score
+        doc.setFont('helvetica', 'bold');
+        doc.text(`${itemScore}/${maxScore}`, col2, y + 4);
+        
+        // Severity if exists
+        if (severity) {
+            doc.setFontSize(7);
+            doc.setFont('helvetica', 'normal');
+            doc.setTextColor(100, 100, 100);
+            doc.text(severity, col2 + 18, y + 4);
+        }
+        
+        y += 7;
+    });
+    
+    // Total row
+    doc.setDrawColor(220, 220, 220);
+    doc.line(margin, y, margin + contentWidth, y);
+    y += 2;
+    
+    doc.setFontSize(8);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(30, 30, 30);
+    doc.text('TOTAL', col1, y + 4);
+    doc.text(`${score.total}/${score.maxPossible}`, col2, y + 4);
+    
+    if (score.severity?.label) {
+        doc.setFontSize(7);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(100, 100, 100);
+        doc.text(score.severity.label, col2 + 18, y + 4);
+    }
+    
+    y += 6;
+    
+    return y;
+}
+
+/**
+ * Render domains in vertical list
+ */
+function renderDomains(doc, score, margin, y, contentWidth) {
+    const items = score.domainScores;
+    const itemsArray = Array.isArray(items) ? items : Object.values(items);
+    
+    const col1 = margin + 3;
+    const col2 = margin + 80;
+    const col3 = margin + 110;
+    const col4 = margin + 140;
+    
+    doc.setFontSize(7);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(100, 100, 100);
+    doc.text('DOMAIN', col1, y + 5);
+    doc.text('PRE', col2, y + 5);
+    doc.text('INTRA', col3, y + 5);
+    doc.text('POST', col4, y + 5);
+    
+    y += 7;
+    doc.setDrawColor(220, 220, 220);
+    doc.line(margin, y, margin + contentWidth, y);
+    y += 2;
+    
+    itemsArray.forEach((item, idx) => {
+        const name = item.name || item.id || `Domain ${idx + 1}`;
+        const shortName = name.length > 25 ? name.substring(0, 23) + '..' : name;
+        const itemScore = item.score ?? item.weighted ?? item.raw ?? '-';
+        
+        doc.setFontSize(8);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(30, 30, 30);
+        doc.text(shortName, col1, y + 4);
+        
+        doc.setFont('helvetica', 'bold');
+        doc.text(String(itemScore), col2, y + 4);
+        
+        y += 7;
+    });
+    
+    // Total
+    doc.setDrawColor(220, 220, 220);
+    doc.line(margin, y, margin + contentWidth, y);
+    y += 2;
+    
+    doc.setFontSize(8);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(30, 30, 30);
+    doc.text('TOTAL SCORE', col1, y + 4);
+    doc.text(`${score.total}/${score.maxPossible}`, col2, y + 4);
+    
+    if (score.severity?.label) {
+        doc.setFontSize(7);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(100, 100, 100);
+        doc.text(score.severity.label, col2 + 25, y + 4);
+    }
+    
+    y += 6;
+    
+    return y;
+}
+
+/**
+ * Render simple single-score scale
+ */
+function renderSimpleScore(doc, score, margin, y, contentWidth) {
+    const col1 = margin + 3;
+    const col2 = margin + 50;
+    const col3 = margin + 90;
+    const col4 = margin + 130;
+    
+    // Header row
+    doc.setFontSize(7);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(100, 100, 100);
+    doc.text('MEASURE', col1, y + 5);
+    doc.text('PRE', col2, y + 5);
+    doc.text('INTRA', col3, y + 5);
+    doc.text('POST', col4, y + 5);
+    
+    y += 7;
+    doc.setDrawColor(220, 220, 220);
+    doc.line(margin, y, margin + contentWidth, y);
+    y += 2;
+    
+    // Score row
+    doc.setFontSize(8);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(30, 30, 30);
+    doc.text('Total Score', col1, y + 5);
+    
+    doc.setFont('helvetica', 'bold');
+    doc.text(`${score.total}/${score.maxPossible}`, col2, y + 5);
+    
+    y += 9;
+    
+    // Severity row
+    if (score.severity?.label) {
+        doc.setFont('helvetica', 'normal');
+        doc.text('Severity', col1, y + 4);
+        
+        doc.setFont('helvetica', 'bold');
+        doc.text(score.severity.label, col2, y + 4);
+        
+        y += 8;
+    }
+    
+    return y;
+}
+
+/**
  * Download the PDF report
- * 
- * @param {Object} options - Download options
  */
 export async function downloadReport(options = {}) {
     try {
         const doc = await generateReport(options);
         const state = StateManager.getState();
         
-        // Generate filename using patient ID (which already contains name prefix)
         const date = new Date().toISOString().split('T')[0];
         const patientId = state.patient_id || 'unknown';
         const condition = (state.condition || 'assessment').replace(/\s+/g, '-').toLowerCase();
         const filename = options.filename || `${patientId}_${condition}_${date}.pdf`;
         
-        // Download
         doc.save(filename);
         
         return true;
@@ -364,10 +447,7 @@ export async function downloadReport(options = {}) {
 }
 
 /**
- * Get PDF as blob for preview or other uses
- * 
- * @param {Object} options - Generation options
- * @returns {Promise<Blob>} PDF blob
+ * Get PDF as blob
  */
 export async function getReportBlob(options = {}) {
     const doc = await generateReport(options);
@@ -376,16 +456,12 @@ export async function getReportBlob(options = {}) {
 
 /**
  * Get PDF as data URI
- * 
- * @param {Object} options - Generation options
- * @returns {Promise<string>} Data URI
  */
 export async function getReportDataUri(options = {}) {
     const doc = await generateReport(options);
     return doc.output('datauristring');
 }
 
-// Export PDF generator
 export default {
     generateReport,
     downloadReport,
