@@ -9,7 +9,7 @@
     "instructions": "We are interested in the extent that you have felt fatigued (tired, weary, exhausted) over the last two weeks. We do not mean feelings of sleepiness (the likelihood of falling asleep). Please select the appropriate response in accordance with your average feelings over this two-week period.",
     "estimatedTime": "3-5 minutes",
     "scoringType": "sum",
-    "maxScore": 26,
+    "maxScore": 24,
     "totalItems": 7,
 
     "questions": [
@@ -100,8 +100,8 @@
             "required": true,
             "options": [
                 { "value": 0, "label": "Not at all", "points": 0 },
-                { "value": 1, "label": "Moderately", "points": 3 },
-                { "value": 2, "label": "Entirely", "points": 6 }
+                { "value": 1, "label": "Moderately", "points": 2 },
+                { "value": 2, "label": "Entirely", "points": 4 }
             ]
         }
     ],
@@ -119,30 +119,30 @@
             "id": "mild",
             "label": "Mild Fatigue",
             "min": 6,
-            "max": 12,
+            "max": 11,
             "color": "#eab308",
             "description": "Mild fatigue that may warrant monitoring."
         },
         {
             "id": "moderate",
             "label": "Moderate Fatigue",
-            "min": 13,
-            "max": 19,
+            "min": 12,
+            "max": 17,
             "color": "#f97316",
             "description": "Moderate fatigue impacting daily functioning."
         },
         {
             "id": "severe",
             "label": "Severe Fatigue",
-            "min": 20,
-            "max": 26,
+            "min": 18,
+            "max": 24,
             "color": "#ef4444",
             "description": "Severe fatigue significantly affecting quality of life."
         }
     ],
 
     "interpretation": {
-        "scoringMethod": "Sum scored items (questions 1-4, 6-7). Question 5 is descriptive and not included in total score. Range: 0-26.",
+        "scoringMethod": "Sum scored items (questions 1-4, 6-7). Question 5 is descriptive and not included in total score. Range: 0-24.",
         "fatigueVsSleepiness": "This scale specifically measures fatigue (tiredness, weariness, exhaustion) as distinct from sleepiness (likelihood of falling asleep).",
         "clinicalNotes": "Question 7 provides insight into whether fatigue may be sleep-related, which can guide treatment approaches. Question 5 identifies temporal patterns of fatigue."
     },

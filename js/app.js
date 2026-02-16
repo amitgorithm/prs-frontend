@@ -54,6 +54,7 @@ const elements = {
     totalScales: document.getElementById('totalScales'),
     scaleTitle: document.getElementById('scaleTitle'),
     scaleDescription: document.getElementById('scaleDescription'),
+    categoryTag: document.getElementById('categoryTag'),
     recallPeriod: document.getElementById('recallPeriod'),
     scoringInfo: document.getElementById('scoringInfo'),
     estimatedTime: document.getElementById('estimatedTime'),
@@ -66,6 +67,12 @@ const elements = {
     btnNextQuestion: document.getElementById('btnNextQuestion'),
     btnDevPrefill: document.getElementById('btnDevPrefill'),
     validationMessage: document.getElementById('validationMessage'),
+    
+    // Mobile sidebar toggle
+    btnMobileProgress: document.getElementById('btnMobileProgress'),
+    mobileProgressBadge: document.getElementById('mobileProgressBadge'),
+    sidebarOverlay: document.getElementById('sidebarOverlay'),
+    scaleSidebar: document.querySelector('.scale-sidebar'),
     
     // Results
     resultPatientId: document.getElementById('resultPatientId'),
@@ -337,6 +344,14 @@ function setupEventListeners() {
     // Skip scale button
     if (elements.btnSkipScale) {
         elements.btnSkipScale.addEventListener('click', handleSkipScale);
+    }
+    
+    // Mobile sidebar toggle
+    if (elements.btnMobileProgress) {
+        elements.btnMobileProgress.addEventListener('click', toggleMobileSidebar);
+    }
+    if (elements.sidebarOverlay) {
+        elements.sidebarOverlay.addEventListener('click', closeMobileSidebar);
     }
     
     // Header menu
@@ -625,6 +640,11 @@ async function loadCurrentScale() {
     elements.scaleTitle.textContent = currentScale.name;
     elements.scaleDescription.textContent = currentScale.description || '';
     
+    // Update category tag
+    if (elements.categoryTag) {
+        elements.categoryTag.textContent = state.conditionLabel || 'Assessment';
+    }
+    
     // Meta info
     elements.recallPeriod.textContent = currentScale.recallPeriod || 'Current';
     elements.scoringInfo.textContent = getScoringDescription(currentScale);
@@ -746,6 +766,11 @@ function renderScaleNavigation() {
     }).length;
     const progress = Math.round((completedCount / state.scaleOrder.length) * 100);
     elements.progressPercent.textContent = `${progress}%`;
+    
+    // Update mobile progress badge too
+    if (elements.mobileProgressBadge) {
+        elements.mobileProgressBadge.textContent = `${progress}%`;
+    }
 }
 
 /**
@@ -767,6 +792,9 @@ async function navigateToScale(targetIndex) {
         return;
     }
     
+    // Close mobile sidebar if open
+    closeMobileSidebar();
+    
     // Update state to target scale
     StateManager.updateState({ currentScaleIndex: targetIndex });
     
@@ -784,12 +812,27 @@ function renderAllQuestions() {
     
     let html = '';
     let currentGroup = null;
+    let currentSection = null;
     
     currentScale.questions.forEach((question, index) => {
         const savedResponse = StateManager.getResponse(scaleId, index);
         const isAnswered = savedResponse !== undefined && savedResponse !== null && savedResponse !== '';
         
-        // Group header if applicable
+        // Section header with instructions (for scales like FIQR)
+        if (question.section && question.section !== currentSection) {
+            currentSection = question.section;
+            const sectionConfig = currentScale.sections?.find(s => s.id === question.section);
+            if (sectionConfig) {
+                html += `
+                    <div class="section-header">
+                        <h3 class="section-title">${sectionConfig.name || question.section}</h3>
+                        ${sectionConfig.instruction ? `<p class="section-instruction">${sectionConfig.instruction}</p>` : ''}
+                    </div>
+                `;
+            }
+        }
+        
+        // Group header if applicable (legacy support)
         if (question.groupLabel && question.group !== currentGroup) {
             currentGroup = question.group;
             html += `<div class="question-group-header">${question.groupLabel}</div>`;
@@ -829,10 +872,12 @@ function renderQuestionOptions(question, savedResponse, scaleId, questionIndex) 
         case 'time':
             return renderTimeInput(question, savedResponse, questionIndex);
         case 'number':
+        case 'numeric':
             return renderNumberInput(question, savedResponse, questionIndex);
         case 'text':
             return renderTextInput(question, savedResponse, questionIndex);
         case 'visual-analogue-scale':
+        case 'vas':
             return renderVASInput(question, savedResponse, questionIndex);
         default:
             return renderOptionsGrid(question, savedResponse, scaleId, questionIndex);
@@ -1051,12 +1096,14 @@ function renderCurrentQuestion() {
             html += renderTimeInput(question, savedResponse);
             break;
         case 'number':
+        case 'numeric':
             html += renderNumberInput(question, savedResponse);
             break;
         case 'text':
             html += renderTextInput(question, savedResponse);
             break;
         case 'visual-analogue-scale':
+        case 'vas':
             html += renderVASInput(question, savedResponse);
             break;
         case 'likert-with-text':
@@ -1128,22 +1175,44 @@ function renderTimeInput(question, savedResponse, questionIndex) {
 }
 
 /**
- * Render number input - uses dropdown if range is reasonable
+ * Render number input - uses text input for exact values or dropdown for predefined ranges
  */
 function renderNumberInput(question, savedResponse, questionIndex) {
-    const min = question.min !== undefined ? question.min : 0;
-    const max = question.max !== undefined ? question.max : 999;
+    const min = question.minValue !== undefined ? question.minValue : (question.min !== undefined ? question.min : 0);
+    const max = question.maxValue !== undefined ? question.maxValue : (question.max !== undefined ? question.max : 999);
     const step = question.step || 1;
+    const unit = question.unit || '';
     
-    // For minutes (0-999) or similar, use grouped dropdown
-    // Create reasonable intervals
+    // For "days" or "numeric" type questions, use a direct number input for exact values
+    if (unit === 'days' || question.type === 'numeric' || question.useDirectInput === true) {
+        return `
+            <div class="input-container numeric-input-container">
+                <div class="number-input-wrapper">
+                    <input type="number" 
+                           id="responseInput"
+                           class="form-input question-input number-input" 
+                           data-question="${questionIndex}"
+                           min="${min}" 
+                           max="${max}" 
+                           step="${step}"
+                           value="${savedResponse !== undefined ? savedResponse : ''}"
+                           placeholder="Enter number"
+                           inputmode="numeric">
+                    ${unit ? `<span class="input-unit-label">${unit}</span>` : ''}
+                </div>
+                <div class="input-hint">Enter a number between ${min} and ${max}${unit ? ' ' + unit : ''}</div>
+            </div>
+        `;
+    }
+    
+    // For other ranges, use dropdown
     let options = '<option value="">Select...</option>';
     
     if (max - min <= 60) {
         // Small range - show all values
         for (let v = min; v <= max; v += step) {
             const selected = savedResponse == v ? 'selected' : '';
-            options += `<option value="${v}" ${selected}>${v}${question.unit ? ' ' + question.unit : ''}</option>`;
+            options += `<option value="${v}" ${selected}>${v}${unit ? ' ' + unit : ''}</option>`;
         }
     } else {
         // Large range - create intervals
@@ -1155,7 +1224,7 @@ function renderNumberInput(question, savedResponse, questionIndex) {
         validIntervals.forEach(v => {
             const selected = savedResponse == v ? 'selected' : '';
             let label = v.toString();
-            if (question.unit === 'minutes' && v >= 60) {
+            if (unit === 'minutes' && v >= 60) {
                 const hrs = Math.floor(v / 60);
                 const mins = v % 60;
                 label = `${v} (${hrs}h${mins > 0 ? ' ' + mins + 'm' : ''})`;
@@ -1171,10 +1240,10 @@ function renderNumberInput(question, savedResponse, questionIndex) {
                         data-question="${questionIndex}">
                     ${options}
                 </select>
-                ${question.unit ? `<span class="input-unit">${question.unit}</span>` : ''}
+                ${unit ? `<span class="input-unit">${unit}</span>` : ''}
             </div>
-            ${question.min !== undefined || question.max !== undefined ? 
-                `<div class="input-hint">Range: ${min} - ${max}${question.unit ? ' ' + question.unit : ''}</div>` : ''}
+            ${min !== undefined || max !== undefined ? 
+                `<div class="input-hint">Range: ${min} - ${max}${unit ? ' ' + unit : ''}</div>` : ''}
         </div>
     `;
 }
@@ -1197,15 +1266,18 @@ function renderTextInput(question, savedResponse, questionIndex) {
  * Render Visual Analogue Scale
  */
 function renderVASInput(question, savedResponse, questionIndex) {
-    const min = question.minValue || 0;
-    const max = question.maxValue || 100;
-    const value = savedResponse !== undefined ? savedResponse : 50;
+    const min = question.minValue || question.min || (question.range ? question.range.min : 0) || 0;
+    const max = question.maxValue || question.max || (question.range ? question.range.max : 100) || 100;
+    const defaultValue = Math.round((min + max) / 2);
+    const value = savedResponse !== undefined ? savedResponse : defaultValue;
+    const leftLabel = question.minLabel || question.leftAnchor || min;
+    const rightLabel = question.maxLabel || question.rightAnchor || max;
     
     return `
         <div class="vas-input-container">
             <div class="vas-labels">
-                <span class="vas-min-label">${question.minLabel || min}</span>
-                <span class="vas-max-label">${question.maxLabel || max}</span>
+                <span class="vas-min-label">${leftLabel}</span>
+                <span class="vas-max-label">${rightLabel}</span>
             </div>
             <input type="range" 
                    class="vas-input" 
@@ -1281,6 +1353,7 @@ function attachInputHandlers(question, scaleId, questionIndex) {
     switch (question.type) {
         case 'time':
         case 'number':
+        case 'numeric':
         case 'text':
             if (input) {
                 input.addEventListener('input', (e) => {
@@ -1294,6 +1367,7 @@ function attachInputHandlers(question, scaleId, questionIndex) {
             break;
             
         case 'visual-analogue-scale':
+        case 'vas':
             if (input) {
                 const valueDisplay = document.getElementById('vasCurrentValue');
                 input.addEventListener('input', (e) => {
@@ -1962,6 +2036,30 @@ function hideHeaderMenu() {
 }
 
 /**
+ * Toggle mobile sidebar visibility
+ */
+function toggleMobileSidebar() {
+    if (elements.scaleSidebar) {
+        elements.scaleSidebar.classList.toggle('open');
+    }
+    if (elements.sidebarOverlay) {
+        elements.sidebarOverlay.classList.toggle('active');
+    }
+}
+
+/**
+ * Close mobile sidebar
+ */
+function closeMobileSidebar() {
+    if (elements.scaleSidebar) {
+        elements.scaleSidebar.classList.remove('open');
+    }
+    if (elements.sidebarOverlay) {
+        elements.sidebarOverlay.classList.remove('active');
+    }
+}
+
+/**
  * Handle skip scale - mark current scale as skipped and move to next
  */
 function handleSkipScale() {
@@ -2131,7 +2229,8 @@ function devPrefillCurrentScale() {
                 defaultValue = 'Test response';
                 break;
             case 'visual-analogue-scale':
-                defaultValue = 50;
+            case 'vas':
+                defaultValue = question.range ? Math.round((question.range.min + question.range.max) / 2) : 5;
                 break;
             default:
                 // For likert/options, pick the middle option or first option

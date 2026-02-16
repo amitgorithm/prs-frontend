@@ -16,6 +16,7 @@ const scoringHandlers = {
     
     /**
      * Simple sum of all response values
+     * Supports both likert options and direct numeric input
      */
     sum: (responses, scaleConfig) => {
         let total = 0;
@@ -23,9 +24,12 @@ const scoringHandlers = {
         const scoredQuestions = scaleConfig.scoredQuestions || null;
         
         scaleConfig.questions.forEach((question, index) => {
-            // Skip if not in scoredQuestions (when defined) or scoredInTotal is false
+            // Skip if not in scoredQuestions (when defined)
             if (scoredQuestions && !scoredQuestions.includes(index)) return;
+            // Skip if scoredInTotal is false OR includeInScore is false
             if (question.scoredInTotal === false) return;
+            if (question.includeInScore === false) return;
+            if (question.supplementary === true) return;
             
             const value = responses[index];
             if (value !== undefined) {
@@ -44,6 +48,68 @@ const scoringHandlers = {
             total,
             maxPossible: scaleConfig.maxScore || calculateMaxScore(scaleConfig),
             questionScores
+        };
+    },
+    
+    /**
+     * Sum-numeric: alias for sum, handles direct numeric inputs
+     * Used by MIDAS and similar scales with day-count entries
+     */
+    'sum-numeric': (responses, scaleConfig) => {
+        // Use the same logic as sum - it handles numeric values properly
+        return scoringHandlers.sum(responses, scaleConfig);
+    },
+    
+    /**
+     * FIQR weighted scoring
+     * Function domain (Q1-9): sum ÷ 3 = 0-30
+     * Overall domain (Q10-11): sum = 0-20
+     * Symptoms domain (Q12-21): sum ÷ 2 = 0-50
+     * Total: 0-100
+     */
+    'fiqr-weighted': (responses, scaleConfig) => {
+        const domains = scaleConfig.domains || {};
+        const domainScores = {};
+        let total = 0;
+        
+        // Calculate each domain score
+        Object.keys(domains).forEach(domainId => {
+            const domain = domains[domainId];
+            let domainRaw = 0;
+            let answeredCount = 0;
+            
+            domain.items.forEach(itemIndex => {
+                const value = responses[itemIndex];
+                if (value !== undefined && value !== null && value !== '') {
+                    const numValue = parseFloat(value);
+                    if (!isNaN(numValue)) {
+                        domainRaw += numValue;
+                        answeredCount++;
+                    }
+                }
+            });
+            
+            // Apply divisor
+            const divisor = domain.divisor || 1;
+            const domainScore = domainRaw / divisor;
+            
+            domainScores[domainId] = {
+                name: domain.name,
+                raw: domainRaw,
+                divisor: divisor,
+                score: Math.round(domainScore * 100) / 100,
+                maxWeighted: domain.maxWeighted,
+                itemsAnswered: answeredCount,
+                totalItems: domain.items.length
+            };
+            
+            total += domainScore;
+        });
+        
+        return {
+            total: Math.round(total * 100) / 100,
+            maxPossible: scaleConfig.maxScore || 100,
+            domainScores
         };
     },
     
@@ -686,7 +752,7 @@ export function calculateScore(scaleId, responses, scaleConfig) {
     // Build complete score object
     const scoreData = {
         scaleId,
-        scaleName: scaleConfig.name || scaleId,
+        scaleName: scaleConfig.shortName || scaleConfig.id || scaleId,
         total: scoreResult.total,
         maxPossible: scoreResult.maxPossible,
         percentage: scoreResult.maxPossible > 0 

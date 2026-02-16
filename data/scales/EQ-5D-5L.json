@@ -6,7 +6,7 @@
     "version": "1.0",
     "recallPeriod": "Today",
     "scoringType": "profile-and-vas",
-    "maxScore": 100,
+    "maxScore": 10,
     
     "instructions": "Under each heading, please tick the ONE box that best describes your health TODAY.",
     
@@ -20,7 +20,7 @@
         {
             "id": "vas",
             "name": "EQ Visual Analogue Scale",
-            "description": "Self-rated health on a 0-100 scale",
+            "description": "Self-rated health on a 0-10 scale",
             "type": "vas"
         }
     ],
@@ -111,11 +111,11 @@
             "section": "vas",
             "dimension": "eq_vas",
             "label": "YOUR HEALTH TODAY",
-            "question": "We would like to know how good or bad your health is TODAY. This scale is numbered from 0 to 100. 100 means the best health you can imagine. 0 means the worst health you can imagine. Please indicate on this scale how your health is TODAY.",
+            "question": "We would like to know how good or bad your health is TODAY. This scale is numbered from 0 to 10. 10 means the best health you can imagine. 0 means the worst health you can imagine. Please indicate on this scale how your health is TODAY.",
             "type": "visual-analogue-scale",
             "required": true,
             "min": 0,
-            "max": 100,
+            "max": 10,
             "minLabel": "The worst health you can imagine",
             "maxLabel": "The best health you can imagine"
         }
@@ -135,8 +135,8 @@
             "range": "Typically ranges from negative values (states worse than dead) to 1.0 (full health)"
         },
         "vasScore": {
-            "description": "Self-rated health on a 0-100 scale",
-            "range": "0 (worst imaginable) to 100 (best imaginable)"
+            "description": "Self-rated health on a 0-10 scale",
+            "range": "0 (worst imaginable) to 10 (best imaginable)"
         }
     },
     
@@ -180,9 +180,9 @@
         {
             "type": "vas",
             "operator": "<=",
-            "threshold": 30,
+            "threshold": 3,
             "severity": "moderate",
-            "message": "Very low self-rated health (VAS ≤30) - comprehensive health review recommended"
+            "message": "Very low self-rated health (VAS ≤3) - comprehensive health review recommended"
         }
     ],
     
@@ -204,11 +204,11 @@
             ]
         },
         "vasInterpretation": {
-            "80-100": "Good to excellent self-rated health",
-            "60-79": "Moderate self-rated health",
-            "40-59": "Fair self-rated health",
-            "20-39": "Poor self-rated health",
-            "0-19": "Very poor self-rated health"
+            "8-10": "Good to excellent self-rated health",
+            "6-7": "Moderate self-rated health",
+            "4-5": "Fair self-rated health",
+            "2-3": "Poor self-rated health",
+            "0-1": "Very poor self-rated health"
         },
         "clinicalApplications": [
             "Measuring health status in clinical practice",
