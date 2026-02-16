@@ -87,9 +87,7 @@ export async function generateReport(options = {}) {
     // Contact
     const rightX = pageWidth - margin;
     doc.setFontSize(8);
-    doc.text('+357 22 879000', rightX, y + 3, { align: 'right' });
-    doc.text('info@sozobraincenter.com', rightX, y + 7, { align: 'right' });
-    doc.text('www.sozobraincenter.com', rightX, y + 11, { align: 'right' });
+    doc.text('www.sozobraincenter.com', rightX, y + 7, { align: 'right' });
     
     y += 16;
     
