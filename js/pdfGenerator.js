@@ -132,12 +132,10 @@ export async function generateReport(options = {}) {
     }
     const shortCondition = conditionText.length > 25 ? conditionText.substring(0, 23) + '...' : conditionText;
     doc.text(shortCondition, margin + 140, boxY + 6);
-    doc.text(shortCondition, margin + 140, boxY + 6);
     
     doc.setFontSize(8);
     doc.setFont('helvetica', 'normal');
     doc.setTextColor(100, 100, 100);
-    doc.text('Assessment Type: Pre / Αρχική', margin + 4, boxY + 12);
     
     y += 28;
     
@@ -194,7 +192,7 @@ export async function generateReport(options = {}) {
         doc.setFontSize(9);
         doc.setFont('helvetica', 'bold');
         doc.setTextColor(255, 255, 255);
-        doc.text(`${scaleIndex + 1}. ${score.scaleName || scaleId}`, margin + 3, y + 5.5);
+        doc.text(`${scaleIndex + 1}. ${scaleId}`, margin + 3, y + 5.5);
         
         y += 8;
         
