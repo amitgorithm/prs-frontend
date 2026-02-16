@@ -1,555 +1,517 @@
 {
     "id": "PANS-31",
-    "name": "Psychiatric Assessment of Neurological Symptoms - 31 Item Version",
+    "name": "PANS 31-Item Symptom Rating Scale",
     "shortName": "PANS-31",
     "version": "1.0",
-    "description": "A comprehensive screening tool designed to assess psychiatric and behavioral symptoms commonly associated with neurological conditions. Covers domains including mood, anxiety, psychosis, cognitive concerns, sleep, fatigue, and behavioral changes.",
+    "description": "A comprehensive symptom rating scale for assessing PANS (Pediatric Acute-onset Neuropsychiatric Syndrome) symptoms across 31 items covering obsessions, compulsions, anxiety, mood, behavior, cognition, and neurological symptoms.",
     "category": "psychiatric",
-    "recallPeriod": "Past 2 weeks",
-    "instructions": "Please rate how much each of the following symptoms has bothered you during the past 2 weeks. Select the response that best describes your experience.",
-    "estimatedTime": "10-15 minutes",
-    "scoringType": "sum-subscales",
+    "recallPeriod": "During the past week",
+    "instructions": "Please rate the following symptoms based on their severity during the past week.",
+    "estimatedTime": "5-10 minutes",
+    "scoringType": "sum",
     "maxScore": 124,
-    "minScore": 0,
     "totalItems": 31,
-    "administrationType": "self-report",
+
+    "copyright": "PANS 31-Item Symptom Rating Scale (PANS Scale) © 2024 by Tanya K. Murphy, MD, MS & Gail A. Bernstein, MD is licensed under CC BY-NC-SA 4.0",
+    "attribution": "Murphy, T.K. & Bernstein, G.A. (2024). PANS 31-Item Symptom Rating Scale (PANS Rating Scale).",
+    "license": "CC BY-NC-SA 4.0",
+
+    "severityRatings": {
+        "0": "None",
+        "1": "Mild: Slight interference in family, school, or social situations. Overall, symptoms are not impairing.",
+        "2": "Moderate: Definite interference in family, school, or social situations, but still manageable.",
+        "3": "Severe: Causes substantial interference in family, school, or social situations.",
+        "4": "Extreme: Incapacitating symptoms."
+    },
+
+    "definitions": {
+        "obsessions": "Unwanted thoughts or images that come into your child's head. They can be scary or embarrassing or strange. Some children have thoughts of bad things happening to their parents, or of getting sick. Some children have trouble getting the thoughts out of their head.",
+        "compulsions": "Routines, rituals, or actions that your child might feel like they need to do in order to stop bad things from happening or until something is 'just so'. Some children line things up or arrange things in a certain way, or ask their parents for reassurance.",
+        "moodSwings": "When your child's mood changes quickly and frequently. Your child may go from being happy or calm to being upset about something.",
+        "suicidalIdeation": "When your child thinks or expresses not wanting to be alive anymore, or does something intentionally to hurt themselves. An example of suicidal ideation is when a child says that they want to die or would rather be dead.",
+        "irritability": "When your child is easily annoyed or bothered by little things that would not normally upset someone.",
+        "aggressiveBehaviors": "Can cause physical or emotional harm to others. Examples of aggressive behavior include yelling, hitting/kicking, getting into fights, and bullying others.",
+        "hallucinations": "When your child hears or sees things that are not there in a way that seems strange. Some children hear voices or they see people or things when no one is there.",
+        "motorTics": "Sudden jerks or movements, such as forceful eye blinking or a rapid head jerk to one side or the other. Some tics might be more subtle, like scrunching the nose. They occur during otherwise normal behavior. Other examples of motor tics include jerking the head or arms or legs, or stretching the mouth or jaw in a way that seems odd or too frequent.",
+        "vocalTics": "Sudden utterances of sounds such as throat clearing, sniffing, or words. They can be very loud or soft. Other examples of vocal tics are repeated words or noises, or coughing."
+    },
 
     "questions": [
         {
-            "id": "PANS_1",
+            "id": "PANS31_1",
             "number": 1,
-            "question": "Feeling sad, down, or depressed",
+            "question": "Obsessions",
+            "hint": "Unwanted thoughts or images that come into your child's head. They can be scary, embarrassing, or strange.",
             "type": "likert",
             "required": true,
-            "subscale": "mood",
+            "hasDefinition": true,
             "options": [
-                { "value": 0, "label": "Not at all", "points": 0 },
-                { "value": 1, "label": "A little", "points": 1 },
-                { "value": 2, "label": "Moderately", "points": 2 },
-                { "value": 3, "label": "Quite a bit", "points": 3 },
-                { "value": 4, "label": "Extremely", "points": 4 }
+                { "value": 0, "label": "None", "points": 0 },
+                { "value": 1, "label": "Mild", "points": 1 },
+                { "value": 2, "label": "Moderate", "points": 2 },
+                { "value": 3, "label": "Severe", "points": 3 },
+                { "value": 4, "label": "Extreme", "points": 4 }
             ]
         },
         {
-            "id": "PANS_2",
+            "id": "PANS31_2",
             "number": 2,
-            "question": "Loss of interest or pleasure in activities you used to enjoy",
+            "question": "Compulsions",
+            "hint": "Routines, rituals, or actions that your child feels they need to do in order to stop bad things from happening or until something is 'just so'.",
             "type": "likert",
             "required": true,
-            "subscale": "mood",
+            "hasDefinition": true,
             "options": [
-                { "value": 0, "label": "Not at all", "points": 0 },
-                { "value": 1, "label": "A little", "points": 1 },
-                { "value": 2, "label": "Moderately", "points": 2 },
-                { "value": 3, "label": "Quite a bit", "points": 3 },
-                { "value": 4, "label": "Extremely", "points": 4 }
+                { "value": 0, "label": "None", "points": 0 },
+                { "value": 1, "label": "Mild", "points": 1 },
+                { "value": 2, "label": "Moderate", "points": 2 },
+                { "value": 3, "label": "Severe", "points": 3 },
+                { "value": 4, "label": "Extreme", "points": 4 }
             ]
         },
         {
-            "id": "PANS_3",
+            "id": "PANS31_3",
             "number": 3,
-            "question": "Feeling hopeless about the future",
+            "question": "Hoarding",
             "type": "likert",
             "required": true,
-            "subscale": "mood",
             "options": [
-                { "value": 0, "label": "Not at all", "points": 0 },
-                { "value": 1, "label": "A little", "points": 1 },
-                { "value": 2, "label": "Moderately", "points": 2 },
-                { "value": 3, "label": "Quite a bit", "points": 3 },
-                { "value": 4, "label": "Extremely", "points": 4 }
+                { "value": 0, "label": "None", "points": 0 },
+                { "value": 1, "label": "Mild", "points": 1 },
+                { "value": 2, "label": "Moderate", "points": 2 },
+                { "value": 3, "label": "Severe", "points": 3 },
+                { "value": 4, "label": "Extreme", "points": 4 }
             ]
         },
         {
-            "id": "PANS_4",
+            "id": "PANS31_4",
             "number": 4,
-            "question": "Feeling worthless or excessively guilty",
+            "question": "Food refusal/avoidance",
             "type": "likert",
             "required": true,
-            "subscale": "mood",
             "options": [
-                { "value": 0, "label": "Not at all", "points": 0 },
-                { "value": 1, "label": "A little", "points": 1 },
-                { "value": 2, "label": "Moderately", "points": 2 },
-                { "value": 3, "label": "Quite a bit", "points": 3 },
-                { "value": 4, "label": "Extremely", "points": 4 }
+                { "value": 0, "label": "None", "points": 0 },
+                { "value": 1, "label": "Mild", "points": 1 },
+                { "value": 2, "label": "Moderate", "points": 2 },
+                { "value": 3, "label": "Severe", "points": 3 },
+                { "value": 4, "label": "Extreme", "points": 4 }
             ]
         },
         {
-            "id": "PANS_5",
+            "id": "PANS31_5",
             "number": 5,
-            "question": "Thoughts of death or suicide",
+            "question": "Urge to overeat; thinking about eating all the time",
             "type": "likert",
             "required": true,
-            "subscale": "mood",
-            "criticalItem": true,
             "options": [
-                { "value": 0, "label": "Not at all", "points": 0 },
-                { "value": 1, "label": "A little", "points": 1 },
-                { "value": 2, "label": "Moderately", "points": 2 },
-                { "value": 3, "label": "Quite a bit", "points": 3 },
-                { "value": 4, "label": "Extremely", "points": 4 }
+                { "value": 0, "label": "None", "points": 0 },
+                { "value": 1, "label": "Mild", "points": 1 },
+                { "value": 2, "label": "Moderate", "points": 2 },
+                { "value": 3, "label": "Severe", "points": 3 },
+                { "value": 4, "label": "Extreme", "points": 4 }
             ]
         },
         {
-            "id": "PANS_6",
+            "id": "PANS31_6",
             "number": 6,
-            "question": "Feeling nervous, anxious, or on edge",
+            "question": "Fluid refusal/avoidance",
             "type": "likert",
             "required": true,
-            "subscale": "anxiety",
             "options": [
-                { "value": 0, "label": "Not at all", "points": 0 },
-                { "value": 1, "label": "A little", "points": 1 },
-                { "value": 2, "label": "Moderately", "points": 2 },
-                { "value": 3, "label": "Quite a bit", "points": 3 },
-                { "value": 4, "label": "Extremely", "points": 4 }
+                { "value": 0, "label": "None", "points": 0 },
+                { "value": 1, "label": "Mild", "points": 1 },
+                { "value": 2, "label": "Moderate", "points": 2 },
+                { "value": 3, "label": "Severe", "points": 3 },
+                { "value": 4, "label": "Extreme", "points": 4 }
             ]
         },
         {
-            "id": "PANS_7",
+            "id": "PANS31_7",
             "number": 7,
-            "question": "Unable to stop or control worrying",
+            "question": "Separation anxiety",
             "type": "likert",
             "required": true,
-            "subscale": "anxiety",
             "options": [
-                { "value": 0, "label": "Not at all", "points": 0 },
-                { "value": 1, "label": "A little", "points": 1 },
-                { "value": 2, "label": "Moderately", "points": 2 },
-                { "value": 3, "label": "Quite a bit", "points": 3 },
-                { "value": 4, "label": "Extremely", "points": 4 }
+                { "value": 0, "label": "None", "points": 0 },
+                { "value": 1, "label": "Mild", "points": 1 },
+                { "value": 2, "label": "Moderate", "points": 2 },
+                { "value": 3, "label": "Severe", "points": 3 },
+                { "value": 4, "label": "Extreme", "points": 4 }
             ]
         },
         {
-            "id": "PANS_8",
+            "id": "PANS31_8",
             "number": 8,
-            "question": "Panic attacks or sudden feelings of intense fear",
+            "question": "Other anxiety/fears/phobias/panic attacks",
             "type": "likert",
             "required": true,
-            "subscale": "anxiety",
             "options": [
-                { "value": 0, "label": "Not at all", "points": 0 },
-                { "value": 1, "label": "A little", "points": 1 },
-                { "value": 2, "label": "Moderately", "points": 2 },
-                { "value": 3, "label": "Quite a bit", "points": 3 },
-                { "value": 4, "label": "Extremely", "points": 4 }
+                { "value": 0, "label": "None", "points": 0 },
+                { "value": 1, "label": "Mild", "points": 1 },
+                { "value": 2, "label": "Moderate", "points": 2 },
+                { "value": 3, "label": "Severe", "points": 3 },
+                { "value": 4, "label": "Extreme", "points": 4 }
             ]
         },
         {
-            "id": "PANS_9",
+            "id": "PANS31_9",
             "number": 9,
-            "question": "Avoiding situations because of fear or anxiety",
+            "question": "Mood swings/moodiness",
+            "hint": "When your child's mood changes quickly and frequently.",
             "type": "likert",
             "required": true,
-            "subscale": "anxiety",
+            "hasDefinition": true,
             "options": [
-                { "value": 0, "label": "Not at all", "points": 0 },
-                { "value": 1, "label": "A little", "points": 1 },
-                { "value": 2, "label": "Moderately", "points": 2 },
-                { "value": 3, "label": "Quite a bit", "points": 3 },
-                { "value": 4, "label": "Extremely", "points": 4 }
+                { "value": 0, "label": "None", "points": 0 },
+                { "value": 1, "label": "Mild", "points": 1 },
+                { "value": 2, "label": "Moderate", "points": 2 },
+                { "value": 3, "label": "Severe", "points": 3 },
+                { "value": 4, "label": "Extreme", "points": 4 }
             ]
         },
         {
-            "id": "PANS_10",
+            "id": "PANS31_10",
             "number": 10,
-            "question": "Feeling restless or unable to sit still",
+            "question": "Emotional lability (inappropriate crying or laughing spells)",
             "type": "likert",
             "required": true,
-            "subscale": "anxiety",
             "options": [
-                { "value": 0, "label": "Not at all", "points": 0 },
-                { "value": 1, "label": "A little", "points": 1 },
-                { "value": 2, "label": "Moderately", "points": 2 },
-                { "value": 3, "label": "Quite a bit", "points": 3 },
-                { "value": 4, "label": "Extremely", "points": 4 }
+                { "value": 0, "label": "None", "points": 0 },
+                { "value": 1, "label": "Mild", "points": 1 },
+                { "value": 2, "label": "Moderate", "points": 2 },
+                { "value": 3, "label": "Severe", "points": 3 },
+                { "value": 4, "label": "Extreme", "points": 4 }
             ]
         },
         {
-            "id": "PANS_11",
+            "id": "PANS31_11",
             "number": 11,
-            "question": "Hearing voices or sounds that others cannot hear",
+            "question": "Suicidal ideation/behavior",
+            "hint": "When your child thinks or expresses not wanting to be alive anymore, or does something intentionally to hurt themselves.",
             "type": "likert",
             "required": true,
-            "subscale": "psychosis",
-            "criticalItem": true,
+            "hasDefinition": true,
+            "isCritical": true,
             "options": [
-                { "value": 0, "label": "Not at all", "points": 0 },
-                { "value": 1, "label": "A little", "points": 1 },
-                { "value": 2, "label": "Moderately", "points": 2 },
-                { "value": 3, "label": "Quite a bit", "points": 3 },
-                { "value": 4, "label": "Extremely", "points": 4 }
+                { "value": 0, "label": "None", "points": 0 },
+                { "value": 1, "label": "Mild", "points": 1 },
+                { "value": 2, "label": "Moderate", "points": 2 },
+                { "value": 3, "label": "Severe", "points": 3 },
+                { "value": 4, "label": "Extreme", "points": 4 }
             ]
         },
         {
-            "id": "PANS_12",
+            "id": "PANS31_12",
             "number": 12,
-            "question": "Seeing things that others cannot see",
+            "question": "Depression/sadness",
             "type": "likert",
             "required": true,
-            "subscale": "psychosis",
-            "criticalItem": true,
             "options": [
-                { "value": 0, "label": "Not at all", "points": 0 },
-                { "value": 1, "label": "A little", "points": 1 },
-                { "value": 2, "label": "Moderately", "points": 2 },
-                { "value": 3, "label": "Quite a bit", "points": 3 },
-                { "value": 4, "label": "Extremely", "points": 4 }
+                { "value": 0, "label": "None", "points": 0 },
+                { "value": 1, "label": "Mild", "points": 1 },
+                { "value": 2, "label": "Moderate", "points": 2 },
+                { "value": 3, "label": "Severe", "points": 3 },
+                { "value": 4, "label": "Extreme", "points": 4 }
             ]
         },
         {
-            "id": "PANS_13",
+            "id": "PANS31_13",
             "number": 13,
-            "question": "Believing that others are trying to harm you or control you",
+            "question": "Irritability",
+            "hint": "When your child is easily annoyed or bothered by little things that would not normally upset someone.",
             "type": "likert",
             "required": true,
-            "subscale": "psychosis",
-            "criticalItem": true,
+            "hasDefinition": true,
             "options": [
-                { "value": 0, "label": "Not at all", "points": 0 },
-                { "value": 1, "label": "A little", "points": 1 },
-                { "value": 2, "label": "Moderately", "points": 2 },
-                { "value": 3, "label": "Quite a bit", "points": 3 },
-                { "value": 4, "label": "Extremely", "points": 4 }
+                { "value": 0, "label": "None", "points": 0 },
+                { "value": 1, "label": "Mild", "points": 1 },
+                { "value": 2, "label": "Moderate", "points": 2 },
+                { "value": 3, "label": "Severe", "points": 3 },
+                { "value": 4, "label": "Extreme", "points": 4 }
             ]
         },
         {
-            "id": "PANS_14",
+            "id": "PANS31_14",
             "number": 14,
-            "question": "Unusual or strange thoughts that others find hard to understand",
+            "question": "Oppositional behaviors",
             "type": "likert",
             "required": true,
-            "subscale": "psychosis",
             "options": [
-                { "value": 0, "label": "Not at all", "points": 0 },
-                { "value": 1, "label": "A little", "points": 1 },
-                { "value": 2, "label": "Moderately", "points": 2 },
-                { "value": 3, "label": "Quite a bit", "points": 3 },
-                { "value": 4, "label": "Extremely", "points": 4 }
+                { "value": 0, "label": "None", "points": 0 },
+                { "value": 1, "label": "Mild", "points": 1 },
+                { "value": 2, "label": "Moderate", "points": 2 },
+                { "value": 3, "label": "Severe", "points": 3 },
+                { "value": 4, "label": "Extreme", "points": 4 }
             ]
         },
         {
-            "id": "PANS_15",
+            "id": "PANS31_15",
             "number": 15,
-            "question": "Trouble remembering recent events or conversations",
+            "question": "Aggressive behaviors and/or rage",
+            "hint": "Can cause physical or emotional harm to others, including yelling, hitting/kicking, getting into fights, and bullying.",
             "type": "likert",
             "required": true,
-            "subscale": "cognitive",
+            "hasDefinition": true,
             "options": [
-                { "value": 0, "label": "Not at all", "points": 0 },
-                { "value": 1, "label": "A little", "points": 1 },
-                { "value": 2, "label": "Moderately", "points": 2 },
-                { "value": 3, "label": "Quite a bit", "points": 3 },
-                { "value": 4, "label": "Extremely", "points": 4 }
+                { "value": 0, "label": "None", "points": 0 },
+                { "value": 1, "label": "Mild", "points": 1 },
+                { "value": 2, "label": "Moderate", "points": 2 },
+                { "value": 3, "label": "Severe", "points": 3 },
+                { "value": 4, "label": "Extreme", "points": 4 }
             ]
         },
         {
-            "id": "PANS_16",
+            "id": "PANS31_16",
             "number": 16,
-            "question": "Difficulty concentrating or staying focused",
+            "question": "Hyperactivity or impulsivity",
             "type": "likert",
             "required": true,
-            "subscale": "cognitive",
             "options": [
-                { "value": 0, "label": "Not at all", "points": 0 },
-                { "value": 1, "label": "A little", "points": 1 },
-                { "value": 2, "label": "Moderately", "points": 2 },
-                { "value": 3, "label": "Quite a bit", "points": 3 },
-                { "value": 4, "label": "Extremely", "points": 4 }
+                { "value": 0, "label": "None", "points": 0 },
+                { "value": 1, "label": "Mild", "points": 1 },
+                { "value": 2, "label": "Moderate", "points": 2 },
+                { "value": 3, "label": "Severe", "points": 3 },
+                { "value": 4, "label": "Extreme", "points": 4 }
             ]
         },
         {
-            "id": "PANS_17",
+            "id": "PANS31_17",
             "number": 17,
-            "question": "Trouble finding words or expressing yourself",
+            "question": "Trouble paying attention",
             "type": "likert",
             "required": true,
-            "subscale": "cognitive",
             "options": [
-                { "value": 0, "label": "Not at all", "points": 0 },
-                { "value": 1, "label": "A little", "points": 1 },
-                { "value": 2, "label": "Moderately", "points": 2 },
-                { "value": 3, "label": "Quite a bit", "points": 3 },
-                { "value": 4, "label": "Extremely", "points": 4 }
+                { "value": 0, "label": "None", "points": 0 },
+                { "value": 1, "label": "Mild", "points": 1 },
+                { "value": 2, "label": "Moderate", "points": 2 },
+                { "value": 3, "label": "Severe", "points": 3 },
+                { "value": 4, "label": "Extreme", "points": 4 }
             ]
         },
         {
-            "id": "PANS_18",
+            "id": "PANS31_18",
             "number": 18,
-            "question": "Feeling confused or disoriented",
+            "question": "Baby talk",
             "type": "likert",
             "required": true,
-            "subscale": "cognitive",
             "options": [
-                { "value": 0, "label": "Not at all", "points": 0 },
-                { "value": 1, "label": "A little", "points": 1 },
-                { "value": 2, "label": "Moderately", "points": 2 },
-                { "value": 3, "label": "Quite a bit", "points": 3 },
-                { "value": 4, "label": "Extremely", "points": 4 }
+                { "value": 0, "label": "None", "points": 0 },
+                { "value": 1, "label": "Mild", "points": 1 },
+                { "value": 2, "label": "Moderate", "points": 2 },
+                { "value": 3, "label": "Severe", "points": 3 },
+                { "value": 4, "label": "Extreme", "points": 4 }
             ]
         },
         {
-            "id": "PANS_19",
+            "id": "PANS31_19",
             "number": 19,
-            "question": "Difficulty making decisions",
+            "question": "Other behavioral/developmental regression (poor self-care, immature judgment for age)",
             "type": "likert",
             "required": true,
-            "subscale": "cognitive",
             "options": [
-                { "value": 0, "label": "Not at all", "points": 0 },
-                { "value": 1, "label": "A little", "points": 1 },
-                { "value": 2, "label": "Moderately", "points": 2 },
-                { "value": 3, "label": "Quite a bit", "points": 3 },
-                { "value": 4, "label": "Extremely", "points": 4 }
+                { "value": 0, "label": "None", "points": 0 },
+                { "value": 1, "label": "Mild", "points": 1 },
+                { "value": 2, "label": "Moderate", "points": 2 },
+                { "value": 3, "label": "Severe", "points": 3 },
+                { "value": 4, "label": "Extreme", "points": 4 }
             ]
         },
         {
-            "id": "PANS_20",
+            "id": "PANS31_20",
             "number": 20,
-            "question": "Difficulty falling asleep",
+            "question": "Worsening of school performance",
             "type": "likert",
             "required": true,
-            "subscale": "sleep-fatigue",
             "options": [
-                { "value": 0, "label": "Not at all", "points": 0 },
-                { "value": 1, "label": "A little", "points": 1 },
-                { "value": 2, "label": "Moderately", "points": 2 },
-                { "value": 3, "label": "Quite a bit", "points": 3 },
-                { "value": 4, "label": "Extremely", "points": 4 }
+                { "value": 0, "label": "None", "points": 0 },
+                { "value": 1, "label": "Mild", "points": 1 },
+                { "value": 2, "label": "Moderate", "points": 2 },
+                { "value": 3, "label": "Severe", "points": 3 },
+                { "value": 4, "label": "Extreme", "points": 4 }
             ]
         },
         {
-            "id": "PANS_21",
+            "id": "PANS31_21",
             "number": 21,
-            "question": "Waking up frequently during the night",
+            "question": "Worsening of handwriting/copying/artwork",
             "type": "likert",
             "required": true,
-            "subscale": "sleep-fatigue",
             "options": [
-                { "value": 0, "label": "Not at all", "points": 0 },
-                { "value": 1, "label": "A little", "points": 1 },
-                { "value": 2, "label": "Moderately", "points": 2 },
-                { "value": 3, "label": "Quite a bit", "points": 3 },
-                { "value": 4, "label": "Extremely", "points": 4 }
+                { "value": 0, "label": "None", "points": 0 },
+                { "value": 1, "label": "Mild", "points": 1 },
+                { "value": 2, "label": "Moderate", "points": 2 },
+                { "value": 3, "label": "Severe", "points": 3 },
+                { "value": 4, "label": "Extreme", "points": 4 }
             ]
         },
         {
-            "id": "PANS_22",
+            "id": "PANS31_22",
             "number": 22,
-            "question": "Feeling tired or having low energy during the day",
+            "question": "Cognitive symptoms (difficulty thinking, foggy brain, memory problems)",
             "type": "likert",
             "required": true,
-            "subscale": "sleep-fatigue",
             "options": [
-                { "value": 0, "label": "Not at all", "points": 0 },
-                { "value": 1, "label": "A little", "points": 1 },
-                { "value": 2, "label": "Moderately", "points": 2 },
-                { "value": 3, "label": "Quite a bit", "points": 3 },
-                { "value": 4, "label": "Extremely", "points": 4 }
+                { "value": 0, "label": "None", "points": 0 },
+                { "value": 1, "label": "Mild", "points": 1 },
+                { "value": 2, "label": "Moderate", "points": 2 },
+                { "value": 3, "label": "Severe", "points": 3 },
+                { "value": 4, "label": "Extreme", "points": 4 }
             ]
         },
         {
-            "id": "PANS_23",
+            "id": "PANS31_23",
             "number": 23,
-            "question": "Excessive daytime sleepiness",
+            "question": "Pain (headaches, abdominal pain, body pain)",
             "type": "likert",
             "required": true,
-            "subscale": "sleep-fatigue",
             "options": [
-                { "value": 0, "label": "Not at all", "points": 0 },
-                { "value": 1, "label": "A little", "points": 1 },
-                { "value": 2, "label": "Moderately", "points": 2 },
-                { "value": 3, "label": "Quite a bit", "points": 3 },
-                { "value": 4, "label": "Extremely", "points": 4 }
+                { "value": 0, "label": "None", "points": 0 },
+                { "value": 1, "label": "Mild", "points": 1 },
+                { "value": 2, "label": "Moderate", "points": 2 },
+                { "value": 3, "label": "Severe", "points": 3 },
+                { "value": 4, "label": "Extreme", "points": 4 }
             ]
         },
         {
-            "id": "PANS_24",
+            "id": "PANS31_24",
             "number": 24,
-            "question": "Being easily irritated or angered",
+            "question": "Sleep disturbance",
             "type": "likert",
             "required": true,
-            "subscale": "behavioral",
             "options": [
-                { "value": 0, "label": "Not at all", "points": 0 },
-                { "value": 1, "label": "A little", "points": 1 },
-                { "value": 2, "label": "Moderately", "points": 2 },
-                { "value": 3, "label": "Quite a bit", "points": 3 },
-                { "value": 4, "label": "Extremely", "points": 4 }
+                { "value": 0, "label": "None", "points": 0 },
+                { "value": 1, "label": "Mild", "points": 1 },
+                { "value": 2, "label": "Moderate", "points": 2 },
+                { "value": 3, "label": "Severe", "points": 3 },
+                { "value": 4, "label": "Extreme", "points": 4 }
             ]
         },
         {
-            "id": "PANS_25",
+            "id": "PANS31_25",
             "number": 25,
-            "question": "Outbursts of anger or aggression",
+            "question": "Daytime wetting or bedwetting (enuresis)",
             "type": "likert",
             "required": true,
-            "subscale": "behavioral",
             "options": [
-                { "value": 0, "label": "Not at all", "points": 0 },
-                { "value": 1, "label": "A little", "points": 1 },
-                { "value": 2, "label": "Moderately", "points": 2 },
-                { "value": 3, "label": "Quite a bit", "points": 3 },
-                { "value": 4, "label": "Extremely", "points": 4 }
+                { "value": 0, "label": "None", "points": 0 },
+                { "value": 1, "label": "Mild", "points": 1 },
+                { "value": 2, "label": "Moderate", "points": 2 },
+                { "value": 3, "label": "Severe", "points": 3 },
+                { "value": 4, "label": "Extreme", "points": 4 }
             ]
         },
         {
-            "id": "PANS_26",
+            "id": "PANS31_26",
             "number": 26,
-            "question": "Impulsive behavior (acting without thinking)",
+            "question": "Urinary frequency (uses restroom frequently)",
             "type": "likert",
             "required": true,
-            "subscale": "behavioral",
             "options": [
-                { "value": 0, "label": "Not at all", "points": 0 },
-                { "value": 1, "label": "A little", "points": 1 },
-                { "value": 2, "label": "Moderately", "points": 2 },
-                { "value": 3, "label": "Quite a bit", "points": 3 },
-                { "value": 4, "label": "Extremely", "points": 4 }
+                { "value": 0, "label": "None", "points": 0 },
+                { "value": 1, "label": "Mild", "points": 1 },
+                { "value": 2, "label": "Moderate", "points": 2 },
+                { "value": 3, "label": "Severe", "points": 3 },
+                { "value": 4, "label": "Extreme", "points": 4 }
             ]
         },
         {
-            "id": "PANS_27",
+            "id": "PANS31_27",
             "number": 27,
-            "question": "Decreased motivation to do things",
+            "question": "Bothered by sounds, smells, textures, or lights (sensory amplification)",
             "type": "likert",
             "required": true,
-            "subscale": "behavioral",
             "options": [
-                { "value": 0, "label": "Not at all", "points": 0 },
-                { "value": 1, "label": "A little", "points": 1 },
-                { "value": 2, "label": "Moderately", "points": 2 },
-                { "value": 3, "label": "Quite a bit", "points": 3 },
-                { "value": 4, "label": "Extremely", "points": 4 }
+                { "value": 0, "label": "None", "points": 0 },
+                { "value": 1, "label": "Mild", "points": 1 },
+                { "value": 2, "label": "Moderate", "points": 2 },
+                { "value": 3, "label": "Severe", "points": 3 },
+                { "value": 4, "label": "Extreme", "points": 4 }
             ]
         },
         {
-            "id": "PANS_28",
+            "id": "PANS31_28",
             "number": 28,
-            "question": "Social withdrawal or avoiding others",
+            "question": "Hallucinations",
+            "hint": "When your child hears or sees things that are not there in a way that seems strange.",
             "type": "likert",
             "required": true,
-            "subscale": "behavioral",
+            "hasDefinition": true,
             "options": [
-                { "value": 0, "label": "Not at all", "points": 0 },
-                { "value": 1, "label": "A little", "points": 1 },
-                { "value": 2, "label": "Moderately", "points": 2 },
-                { "value": 3, "label": "Quite a bit", "points": 3 },
-                { "value": 4, "label": "Extremely", "points": 4 }
+                { "value": 0, "label": "None", "points": 0 },
+                { "value": 1, "label": "Mild", "points": 1 },
+                { "value": 2, "label": "Moderate", "points": 2 },
+                { "value": 3, "label": "Severe", "points": 3 },
+                { "value": 4, "label": "Extreme", "points": 4 }
             ]
         },
         {
-            "id": "PANS_29",
+            "id": "PANS31_29",
             "number": 29,
-            "question": "Changes in appetite (eating much more or less than usual)",
+            "question": "Delusions or paranoid thoughts",
             "type": "likert",
             "required": true,
-            "subscale": "somatic",
             "options": [
-                { "value": 0, "label": "Not at all", "points": 0 },
-                { "value": 1, "label": "A little", "points": 1 },
-                { "value": 2, "label": "Moderately", "points": 2 },
-                { "value": 3, "label": "Quite a bit", "points": 3 },
-                { "value": 4, "label": "Extremely", "points": 4 }
+                { "value": 0, "label": "None", "points": 0 },
+                { "value": 1, "label": "Mild", "points": 1 },
+                { "value": 2, "label": "Moderate", "points": 2 },
+                { "value": 3, "label": "Severe", "points": 3 },
+                { "value": 4, "label": "Extreme", "points": 4 }
             ]
         },
         {
-            "id": "PANS_30",
+            "id": "PANS31_30",
             "number": 30,
-            "question": "Physical symptoms without clear medical cause (headaches, pain, nausea)",
+            "question": "Tics (movements)",
+            "hint": "Sudden jerks or movements, such as forceful eye blinking or a rapid head jerk. They occur during otherwise normal behavior.",
             "type": "likert",
             "required": true,
-            "subscale": "somatic",
+            "hasDefinition": true,
             "options": [
-                { "value": 0, "label": "Not at all", "points": 0 },
-                { "value": 1, "label": "A little", "points": 1 },
-                { "value": 2, "label": "Moderately", "points": 2 },
-                { "value": 3, "label": "Quite a bit", "points": 3 },
-                { "value": 4, "label": "Extremely", "points": 4 }
+                { "value": 0, "label": "None", "points": 0 },
+                { "value": 1, "label": "Mild", "points": 1 },
+                { "value": 2, "label": "Moderate", "points": 2 },
+                { "value": 3, "label": "Severe", "points": 3 },
+                { "value": 4, "label": "Extreme", "points": 4 }
             ]
         },
         {
-            "id": "PANS_31",
+            "id": "PANS31_31",
             "number": 31,
-            "question": "Overall, how much have psychiatric or emotional symptoms affected your daily functioning?",
+            "question": "Tics (sounds)",
+            "hint": "Sudden utterances of sounds such as throat clearing, sniffing, or words. They can be very loud or soft.",
             "type": "likert",
             "required": true,
-            "subscale": "global",
+            "hasDefinition": true,
             "options": [
-                { "value": 0, "label": "Not at all", "points": 0 },
-                { "value": 1, "label": "A little", "points": 1 },
-                { "value": 2, "label": "Moderately", "points": 2 },
-                { "value": 3, "label": "Quite a bit", "points": 3 },
-                { "value": 4, "label": "Extremely", "points": 4 }
+                { "value": 0, "label": "None", "points": 0 },
+                { "value": 1, "label": "Mild", "points": 1 },
+                { "value": 2, "label": "Moderate", "points": 2 },
+                { "value": 3, "label": "Severe", "points": 3 },
+                { "value": 4, "label": "Extreme", "points": 4 }
             ]
         }
     ],
 
-    "subscales": [
+    "supplementalQuestions": [
         {
-            "id": "mood",
-            "name": "Mood/Depression",
-            "items": ["PANS_1", "PANS_2", "PANS_3", "PANS_4", "PANS_5"],
-            "minScore": 0,
-            "maxScore": 20,
-            "description": "Depressive symptoms including sadness, anhedonia, hopelessness"
+            "id": "PANS31_obsession_hours",
+            "question": "Number of hours per day involved in obsessions",
+            "type": "number",
+            "required": false,
+            "min": 0,
+            "max": 24,
+            "unit": "hours",
+            "notScored": true
         },
         {
-            "id": "anxiety",
-            "name": "Anxiety",
-            "items": ["PANS_6", "PANS_7", "PANS_8", "PANS_9", "PANS_10"],
-            "minScore": 0,
-            "maxScore": 20,
-            "description": "Anxiety symptoms including worry, panic, avoidance"
-        },
-        {
-            "id": "psychosis",
-            "name": "Psychotic Features",
-            "items": ["PANS_11", "PANS_12", "PANS_13", "PANS_14"],
-            "minScore": 0,
-            "maxScore": 16,
-            "description": "Hallucinations, delusions, and unusual thoughts"
-        },
-        {
-            "id": "cognitive",
-            "name": "Cognitive Concerns",
-            "items": ["PANS_15", "PANS_16", "PANS_17", "PANS_18", "PANS_19"],
-            "minScore": 0,
-            "maxScore": 20,
-            "description": "Subjective cognitive complaints"
-        },
-        {
-            "id": "sleep-fatigue",
-            "name": "Sleep/Fatigue",
-            "items": ["PANS_20", "PANS_21", "PANS_22", "PANS_23"],
-            "minScore": 0,
-            "maxScore": 16,
-            "description": "Sleep disturbance and fatigue"
-        },
-        {
-            "id": "behavioral",
-            "name": "Behavioral Changes",
-            "items": ["PANS_24", "PANS_25", "PANS_26", "PANS_27", "PANS_28"],
-            "minScore": 0,
-            "maxScore": 20,
-            "description": "Irritability, impulsivity, motivation, social behavior"
-        },
-        {
-            "id": "somatic",
-            "name": "Somatic Symptoms",
-            "items": ["PANS_29", "PANS_30"],
-            "minScore": 0,
-            "maxScore": 8,
-            "description": "Appetite changes and physical symptoms"
-        },
-        {
-            "id": "global",
-            "name": "Global Functioning",
-            "items": ["PANS_31"],
-            "minScore": 0,
-            "maxScore": 4,
-            "description": "Overall functional impact"
+            "id": "PANS31_compulsion_hours",
+            "question": "Number of hours per day involved in compulsions/rituals",
+            "type": "number",
+            "required": false,
+            "min": 0,
+            "max": 24,
+            "unit": "hours",
+            "notScored": true
         }
     ],
 
@@ -557,69 +519,70 @@
         {
             "id": "minimal",
             "label": "Minimal Symptoms",
-            "range": { "min": 0, "max": 15 },
+            "min": 0,
+            "max": 15,
             "color": "#22c55e",
-            "description": "Few or no significant psychiatric symptoms."
+            "description": "Few or no PANS symptoms present. Symptoms do not interfere with daily functioning."
         },
         {
             "id": "mild",
             "label": "Mild Symptoms",
-            "range": { "min": 16, "max": 40 },
+            "min": 16,
+            "max": 40,
             "color": "#84cc16",
-            "description": "Mild psychiatric symptoms present."
+            "description": "Mild PANS symptoms present. Slight interference in family, school, or social situations."
         },
         {
             "id": "moderate",
             "label": "Moderate Symptoms",
-            "range": { "min": 41, "max": 70 },
+            "min": 41,
+            "max": 70,
             "color": "#eab308",
-            "description": "Moderate psychiatric symptoms requiring attention."
+            "description": "Moderate PANS symptoms present. Definite interference in family, school, or social situations, but still manageable."
         },
         {
             "id": "severe",
             "label": "Severe Symptoms",
-            "range": { "min": 71, "max": 100 },
+            "min": 71,
+            "max": 100,
             "color": "#f97316",
-            "description": "Severe psychiatric symptoms requiring clinical intervention."
+            "description": "Severe PANS symptoms present. Substantial interference in family, school, or social situations."
         },
         {
-            "id": "very-severe",
-            "label": "Very Severe Symptoms",
-            "range": { "min": 101, "max": 124 },
-            "color": "#dc2626",
-            "description": "Very severe psychiatric symptoms requiring urgent attention."
+            "id": "extreme",
+            "label": "Extreme Symptoms",
+            "min": 101,
+            "max": 124,
+            "color": "#ef4444",
+            "description": "Extreme PANS symptoms present. Multiple incapacitating symptoms significantly impacting daily life."
         }
     ],
 
-    "criticalItems": {
-        "items": ["PANS_5", "PANS_11", "PANS_12", "PANS_13"],
-        "description": "Critical items that warrant immediate clinical attention if endorsed at 2 or higher",
-        "action": "Any score ≥2 on these items should trigger clinical review"
-    },
-
     "interpretation": {
-        "scoringMethod": "Sum all item scores for total (0-124). Calculate subscale totals separately. Higher scores indicate greater symptom burden.",
-        "subscaleInterpretation": "Subscale scores identify specific domains of concern. Elevated subscale scores (>50% of maximum) suggest clinically significant symptoms in that domain.",
-        "criticalItemReview": "Immediately review any critical items (suicidal ideation, hallucinations, delusions) scored ≥2.",
-        "clinicalUse": "Designed for screening psychiatric comorbidity in neurological patients including those with epilepsy, MS, Parkinson's disease, stroke, and dementia. Not a diagnostic tool but guides further assessment.",
-        "minimumClinicallyImportantDifference": "A change of 10 points in total score is generally considered clinically meaningful."
+        "scoringMethod": "Sum all 31 item scores (0-4 each) for a total score ranging from 0 to 124. Higher scores indicate greater symptom severity and functional impairment.",
+        "clinicalCutoffs": {
+            "minimal": "0-15: Minimal or no PANS symptoms",
+            "mild": "16-40: Mild symptoms with slight interference",
+            "moderate": "41-70: Moderate symptoms with definite interference",
+            "severe": "71-100: Severe symptoms with substantial interference",
+            "extreme": "101-124: Extreme symptoms, incapacitating"
+        },
+        "criticalItems": "Item 11 (Suicidal ideation/behavior) should be reviewed carefully regardless of total score. Any endorsement requires clinical follow-up.",
+        "supplementalInfo": "Hours spent on obsessions and compulsions provide additional clinical context but are not included in the total score."
     },
 
     "references": [
         {
-            "citation": "Developed for comprehensive psychiatric screening in neurological populations. Based on established psychiatric screening instruments adapted for neurological conditions.",
-            "note": "Composite measure drawing from validated instruments"
-        },
-        {
-            "citation": "Krishnamoorthy ES, Trimble MR, Blumer D. The classification of neuropsychiatric disorders in epilepsy: a proposal by the ILAE Commission on Psychobiology of Epilepsy. Epilepsy Behav. 2007;10(3):349-353.",
-            "doi": "10.1016/j.yebeh.2006.10.002"
+            "citation": "Murphy, T.K. & Bernstein, G.A. (2024). PANS 31-Item Symptom Rating Scale (PANS Rating Scale).",
+            "license": "CC BY-NC-SA 4.0"
         }
     ],
 
     "metadata": {
-        "createdAt": "2026-02-11",
-        "updatedAt": "2026-02-11",
-        "author": "Composite measure for neuropsychiatric screening",
-        "license": "Free for clinical and research use"
+        "createdAt": "2026-02-16",
+        "updatedAt": "2026-02-16",
+        "authors": "Tanya K. Murphy, MD, MS & Gail A. Bernstein, MD",
+        "copyright": "© 2024",
+        "license": "CC BY-NC-SA 4.0"
     }
 }

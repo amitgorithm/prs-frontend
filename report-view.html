@@ -260,6 +260,94 @@
             color: var(--gray-500);
         }
         
+        /* Responsive Styles */
+        @media (max-width: 768px) {
+            body {
+                padding: 0.5rem;
+            }
+            
+            .report-header {
+                padding: 1.5rem 1rem;
+            }
+            
+            .report-header h1 {
+                font-size: 1.25rem;
+            }
+            
+            .report-container {
+                border-radius: var(--radius);
+            }
+            
+            .patient-info-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 0.75rem;
+            }
+            
+            .patient-field {
+                padding: 0.625rem;
+            }
+            
+            .patient-label {
+                font-size: 0.625rem;
+            }
+            
+            .patient-value {
+                font-size: 0.8125rem;
+            }
+            
+            .section-header {
+                font-size: 0.875rem;
+                padding: 0.75rem 1rem;
+            }
+            
+            .scale-section {
+                padding: 1rem;
+            }
+            
+            .scale-name {
+                font-size: 1rem;
+            }
+            
+            .score-display {
+                padding: 0.75rem;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+            
+            .action-buttons .btn {
+                width: 100%;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            body {
+                padding: 0.25rem;
+            }
+            
+            .patient-info-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .report-header h1 {
+                font-size: 1.125rem;
+            }
+            
+            .report-subtitle {
+                font-size: 0.75rem;
+            }
+            
+            .scale-section {
+                padding: 0.75rem;
+            }
+            
+            .scale-name {
+                font-size: 0.9375rem;
+            }
+        }
+        
         /* Print Styles */
         @media print {
             body {

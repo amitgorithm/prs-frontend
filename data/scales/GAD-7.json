@@ -120,14 +120,6 @@
                 { "value": 2, "label": "Very difficult" },
                 { "value": 3, "label": "Extremely difficult" }
             ]
-        },
-        {
-            "index": 8,
-            "label": "Symptom Onset",
-            "question": "When did the symptoms begin?",
-            "type": "text",
-            "required": false,
-            "scoredInTotal": false
         }
     ],
     

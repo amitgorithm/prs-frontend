@@ -139,11 +139,14 @@
 
         <!-- Screen 2: Scale Assessment -->
         <section id="screenAssessment" class="screen">
+            <!-- Mobile Sidebar Overlay (outside grid) -->
+            <div class="sidebar-overlay" id="sidebarOverlay"></div>
+            
             <div class="assessment-layout">
                 <!-- Left Sidebar: Scale Navigation -->
-                <aside class="scale-sidebar">
+                <aside class="scale-sidebar" id="scaleSidebar">
                     <div class="sidebar-header">
-                        <h3>Assessment Progress</h3>
+                        <h3>PROGRESS</h3>
                         <div class="overall-progress-mini">
                             <div class="progress-ring">
                                 <span id="progressPercent">0%</span>
@@ -159,11 +162,16 @@
                 <main class="scale-main">
                     <!-- Scale Header -->
                     <header class="scale-info-header">
+                        <button class="btn-mobile-menu" id="btnMobileProgress" title="View Progress">
+                            <i class="fas fa-bars"></i>
+                            <span class="mobile-progress-badge" id="mobileProgressBadge">0%</span>
+                        </button>
                         <div class="scale-badge">
                             <span class="scale-number" id="currentScaleNumber">1</span>
                             <span class="scale-total" id="totalScales">of 5</span>
                         </div>
                         <div class="scale-title-section">
+                            <div class="category-tag" id="categoryTag">Depression/Anxiety</div>
                             <h1 id="scaleTitle">Patient Health Questionnaire (PHQ-9)</h1>
                             <p class="scale-description" id="scaleDescription">A self-administered depression screening measure</p>
                         </div>
