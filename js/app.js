@@ -324,10 +324,10 @@ function setupEventListeners() {
     elements.btnPrevQuestion.addEventListener('click', handlePreviousQuestion);
     elements.btnNextQuestion.addEventListener('click', handleNextQuestion);
     
-    // Dev/Debug prefill button
-    if (elements.btnDevPrefill) {
-        elements.btnDevPrefill.addEventListener('click', devPrefillCurrentScale);
-    }
+    // Dev/Debug prefill button - COMMENTED OUT FOR PRODUCTION
+    // if (elements.btnDevPrefill) {
+    //     elements.btnDevPrefill.addEventListener('click', devPrefillCurrentScale);
+    // }
     
     // Results
     elements.btnViewReport.addEventListener('click', () => window.location.href = 'report-view.html');
@@ -2252,8 +2252,8 @@ function devPrefillCurrentScale() {
     console.log(`Pre-filled ${currentScale.questions.length} questions for ${scaleId}`);
 }
 
-// Expose to window for console access
-window.devPrefillCurrentScale = devPrefillCurrentScale;
+// Expose to window for console access - COMMENTED OUT FOR PRODUCTION
+// window.devPrefillCurrentScale = devPrefillCurrentScale;
 
 /**
  * Handle settings change
